@@ -1,0 +1,6 @@
+*.filters
+*.user
+Debug
+Release
+.vs
+packages
