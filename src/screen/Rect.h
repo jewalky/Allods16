@@ -45,5 +45,6 @@ struct Rect : public SDL_Rect
 	bool Contains(const Point& p) const;
 	bool Intersects(const Rect& r) const;
 	Rect GetIntersection(const Rect& r) const;
+	Rect GetTranslated(const Point& p) const;
 
 };

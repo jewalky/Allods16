@@ -3,8 +3,6 @@
 #include <string>
 #include <vector>
 
-#include <cstdlib>
-
 // string-related
 std::string __c_Format(const char* format, ...);
 std::vector<std::string> Explode(const std::string& what, const std::string& separator);
@@ -55,10 +53,20 @@ struct _Printf_flags
     } type;
 };
 
-std::string _impl_Printf(_Printf_flags& flags, int p);
+std::string _impl_Printf(_Printf_flags& flags, int64_t p);
+inline std::string _impl_Printf(_Printf_flags& flags, int8_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, int16_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, int32_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, uint8_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, uint16_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, uint32_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, bool p) { return _impl_Printf(flags, int64_t(p)); }
+
 std::string _impl_Printf(_Printf_flags& flags, void* p);
 std::string _impl_Printf(_Printf_flags& flags, std::string p);
-std::string _impl_Printf(_Printf_flags& flags, double p);
+
+std::string _impl_Printf(_Printf_flags& flags, double_t p);
+inline std::string _impl_Printf(_Printf_flags& flags, float_t p) { return _impl_Printf(flags, double_t(p)); }
 
 std::string Format(const char* s);
 

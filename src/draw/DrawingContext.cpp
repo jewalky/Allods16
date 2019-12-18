@@ -162,6 +162,7 @@ void DrawingContext::DrawLine(const Point& v1, const Point& v2, Color c)
             buf += xOffset;
         }
     }
+
 }
 
 void DrawingContext::DrawRect(const Rect& rec, Color c)

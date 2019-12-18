@@ -152,28 +152,36 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Allods16.cpp" />
+    <ClCompile Include="src\data\Resource.cpp" />
     <ClCompile Include="src\draw\DrawingContext.cpp" />
+    <ClCompile Include="src\File.cpp" />
     <ClCompile Include="src\logging.cpp" />
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\MemoryStream.cpp" />
     <ClCompile Include="src\screen\Point.cpp" />
     <ClCompile Include="src\screen\Rect.cpp" />
     <ClCompile Include="src\screen\Screen.cpp" />
+    <ClCompile Include="src\Stream.cpp" />
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\data\Resource.h" />
     <ClInclude Include="src\draw\DrawingContext.h" />
+    <ClInclude Include="src\File.h" />
     <ClInclude Include="src\logging.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\MemoryStream.h" />
     <ClInclude Include="src\screen\Color.h" />
     <ClInclude Include="src\screen\Point.h" />
     <ClInclude Include="src\screen\Rect.h" />
     <ClInclude Include="src\screen\Screen.h" />
+    <ClInclude Include="src\Stream.h" />
     <ClInclude Include="src\utils.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>

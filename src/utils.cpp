@@ -1,5 +1,6 @@
 #include "utils.h"
 
+#include <cstdlib>
 #include <cstdarg>
 #include <cstdio>
 #include <ctime>
@@ -298,7 +299,7 @@ std::string Format(const char* s)
     return s;
 }
 
-std::string _impl_Printf(_Printf_flags& flags, int p)
+std::string _impl_Printf(_Printf_flags& flags, int64_t p)
 {
     // we cheat here
     std::string printf_real = "%";
@@ -314,7 +315,7 @@ std::string _impl_Printf(_Printf_flags& flags, int p)
     else if (flags.type == _Printf_flags::Tbighex) printf_real.push_back('X');
     else if (flags.type == _Printf_flags::Tpointer)
     {
-        return __c_Format("0x%08X", (unsigned int)p);
+        return __c_Format("0x%08X", (uint64_t)p);
     }
     else if (flags.type == _Printf_flags::Tbigint) printf_real.push_back('u');
     else printf_real.push_back('d');
@@ -353,7 +354,7 @@ std::string _impl_Printf(_Printf_flags& flags, std::string p)
     return __c_Format(printf_real.c_str(), p.c_str());
 }
 
-std::string _impl_Printf(_Printf_flags& flags, double p)
+std::string _impl_Printf(_Printf_flags& flags, double_t p)
 {
     std::string printf_real = "%";
     if (flags.flg_minus == 1)

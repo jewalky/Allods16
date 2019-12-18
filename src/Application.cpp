@@ -3,6 +3,7 @@
 #include "logging.h"
 
 #include "draw/DrawingContext.h"
+#include "File.h"
 
 #include <iostream>
 

@@ -98,3 +98,13 @@ Rect Rect::GetIntersection(const Rect& r) const
 		std::min(GetBottom(), r.GetBottom())
 	);
 }
+
+Rect Rect::GetTranslated(const Point& p) const
+{
+	return Rect::FromXYWH(
+		x + p.x,
+		y + p.y,
+		w,
+		h
+	);
+}
