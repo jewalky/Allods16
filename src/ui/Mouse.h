@@ -95,4 +95,6 @@ private:
 	// stores saved screen rect
 	ImageTruecolor* mSavedBuffer;
 	Rect mSavedRect;
+
+	uint64_t mLastTime = 0;
 };

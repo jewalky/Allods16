@@ -5,6 +5,7 @@
 #include "screen/Screen.h"
 #include "data/Resource.h"
 #include "ui/Mouse.h"
+#include "ui/RootUIElement.h"
 
 class Application
 {
@@ -24,6 +25,7 @@ public:
 	//
 	ResourceManager* GetResources();
 	Mouse* GetMouse();
+	RootUIElement* GetUIRoot();
 
 private:
 	Application();
@@ -41,4 +43,5 @@ private:
 	//
 	ResourceManager* mResources;
 	Mouse* mMouse;
+	RootUIElement* mUIRoot;
 };

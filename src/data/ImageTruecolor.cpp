@@ -74,12 +74,31 @@ void ImageTruecolor::DrawPartial(DrawingContext& ctx, int32_t x, int32_t y, cons
 	Color* screenBuffer = ctx.GetBuffer() + screenRec.y * ctx.GetPitch() + screenRec.x;
 	Color* buffer = mPixels.data() + clipRec.y * mWidth + clipRec.x;
 
-	for (int y = clipRec.GetTop(); y < clipRec.GetBottom(); y++)
+	if (colorkey < 0)
 	{
-		for (int x = clipRec.GetLeft(); x < clipRec.GetRight(); x++)
-			DrawingContext::AlphaBlend(*buffer++, *screenBuffer++);
-		screenBuffer += ctx.GetPitch() - clipRec.w;
-		buffer += mWidth - clipRec.w;
+		for (int y = clipRec.GetTop(); y < clipRec.GetBottom(); y++)
+		{
+			for (int x = clipRec.GetLeft(); x < clipRec.GetRight(); x++)
+				DrawingContext::AlphaBlend(*buffer++, *screenBuffer++);
+			screenBuffer += ctx.GetPitch() - clipRec.w;
+			buffer += mWidth - clipRec.w;
+		}
+	}
+	else
+	{
+		for (int y = clipRec.GetTop(); y < clipRec.GetBottom(); y++)
+		{
+			for (int x = clipRec.GetLeft(); x < clipRec.GetRight(); x++)
+			{
+				Color c = *buffer;
+				if ((c.value & 0xF0F0F0) != (colorkey & 0xF0F0F0))
+					*screenBuffer = c;
+				buffer++;
+				screenBuffer++;
+			}
+			screenBuffer += ctx.GetPitch() - clipRec.w;
+			buffer += mWidth - clipRec.w;
+		}
 	}
 }
 

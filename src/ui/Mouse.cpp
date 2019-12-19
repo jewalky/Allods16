@@ -8,7 +8,7 @@ Mouse::Mouse()
 {
 	mInternalCursors.resize(NUM_CURSORS);
 	mInternalCursors[Default].Set(new Sprite16A("graphics/cursors/default/sprites.16a"), 4, 4, -1, false);
-	mInternalCursors[Wait].Set(new Sprite16A("graphics/cursors/wait/sprites.16a"), 16, 16, 40, false);
+	mInternalCursors[Wait].Set(new Sprite16A("graphics/cursors/wait/sprites.16a"), 16, 16, 50, false);
 	mCurrentCursor = nullptr;
 	mSavedBuffer = new ImageTruecolor(0, 0);
 }
@@ -23,6 +23,22 @@ void Mouse::PreApply()
 
 	if (mCurrentCursor == nullptr || mCurrentCursor->mSprite == nullptr)
 		return;
+
+	// tick mouse animation
+	if (mLastTime == 0)
+		mLastTime = Application::GetTicks();
+	
+	if (mCurrentCursor->mAnimDelay > 0)
+	{
+		int64_t leftTime = Application::GetTicks() - mLastTime;
+		while (leftTime > mCurrentCursor->mAnimDelay)
+		{
+			mCurrentCursor->mAnimFrame = (mCurrentCursor->mAnimFrame + 1) % mCurrentCursor->mSprite->GetSize();
+			leftTime -= mCurrentCursor->mAnimDelay;
+			mLastTime += mCurrentCursor->mAnimDelay;
+		}
+		
+	}
 
 	Screen* screen = Application::GetInstance()->GetScreen();
 	Rect viewport = screen->GetViewport();

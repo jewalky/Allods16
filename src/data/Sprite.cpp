@@ -14,6 +14,11 @@ int Sprite::GetHeight(uint32_t index)
 	return mFrames[index].mHeight;
 }
 
+uint32_t Sprite::GetSize()
+{
+	return mFrames.size();
+}
+
 const std::vector<Color>& Sprite::GetPalette()
 {
 	return mPalette;

@@ -4,9 +4,8 @@
 
 #include "draw/DrawingContext.h"
 #include "data/Resource.h"
-#include "data/ImageTruecolor.h"
 
-#include <iostream>
+#include "mapview/MapView.h"
 
 Application* Application::mApplication = nullptr;
 std::vector<std::string> Application::mArguments;
@@ -52,6 +51,11 @@ Mouse* Application::GetMouse()
 	return mMouse;
 }
 
+RootUIElement* Application::GetUIRoot()
+{
+	return mUIRoot;
+}
+
 void Application::Exit()
 {
 	mExiting = true;
@@ -81,19 +85,21 @@ int Application::Run()
 	mResources = new ResourceManager();
 	mMouse = new Mouse();
 	mMouse->SetCursor(Mouse::Default);
+	mUIRoot = new RootUIElement();
 
 	DrawingContext ctx(mScreen);
 	ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
 
-	ImageTruecolor* img = new ImageTruecolor("main/graphics/mainmenu/menu_.bmp");
-	img->MoveInPlace(0, -64);
-	img->Draw(ctx, 0, 0);
+	// start loading a map
+	new MapView(mUIRoot);
 
 	while (!mExiting)
 	{
 		SDL_Event ev;
 		while (mScreen->PollEvent(ev))
 			HandleEvent(&ev);
+
+		mUIRoot->PropagateTick();
 
 		mMouse->PreApply();
 		mScreen->Apply();
@@ -117,4 +123,6 @@ void Application::HandleEvent(const SDL_Event* ev)
 	default:
 		break;
 	}
+
+	mUIRoot->PropagateEvent(ev);
 }
