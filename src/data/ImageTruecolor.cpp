@@ -147,7 +147,6 @@ void ImageTruecolor::MoveInPlace(int32_t offsX, int32_t offsY)
 	Color* buffer = mPixels.data();
 	bool isBackwards = int32_t(mWidth) * offsY + offsX >= 0;
 	Rect copyRect = Rect::FromXYWH(offsX, offsY, mWidth, mHeight).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
-	Printf("copyRect = %d,%d,%d,%d; isBackwards = %d", copyRect.x, copyRect.y, copyRect.w, copyRect.h, isBackwards);
 
 	if (!isBackwards)
 	{
