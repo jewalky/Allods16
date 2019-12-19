@@ -3,7 +3,7 @@
 #include "logging.h"
 
 #include "draw/DrawingContext.h"
-#include "File.h"
+#include "data/Resource.h"
 
 #include <iostream>
 
@@ -41,6 +41,11 @@ Screen* Application::GetScreen()
 	return mScreen;
 }
 
+ResourceManager* Application::GetResources()
+{
+	return mResources;
+}
+
 void Application::Exit()
 {
 	mExiting = true;
@@ -61,6 +66,8 @@ int Application::Run()
 		Printf("Failed to initialize screen");
 		return 1;
 	}
+
+	mResources = new ResourceManager();
 
 	while (!mExiting)
 	{

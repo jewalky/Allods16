@@ -9,7 +9,9 @@ class Stream
 public:
 
 	// base methods
-	virtual bool IsValid() = 0;
+	virtual bool IsValid() { return false; }
+	operator bool() { return IsValid(); }
+
 	virtual bool IsWritable() = 0;
 	virtual bool IsReadable() = 0;
 	virtual uint64_t GetLength() = 0;
@@ -54,7 +56,14 @@ public:
 	std::string ReadString(uint64_t len);
 	std::string WriteString(const std::string& s, uint64_t len);
 
+	// pure text i/o
+	std::string ReadLine();
+	std::string WriteLine(const std::string& line);
+
 protected:
 	Stream() {}
 	virtual ~Stream() {}
+
+private:
+	Stream(const Stream& s) {};
 };

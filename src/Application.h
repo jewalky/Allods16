@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include "screen/Screen.h"
+#include "data/Resource.h"
 
 class Application
 {
@@ -17,6 +18,9 @@ public:
 	void Exit();
 	void Abort(std::string message);
 
+	//
+	ResourceManager* GetResources();
+
 private:
 	Application();
 	~Application();
@@ -29,4 +33,7 @@ private:
 
 	//
 	void HandleEvent(const SDL_Event* ev);
+
+	//
+	ResourceManager* mResources;
 };

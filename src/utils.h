@@ -60,6 +60,7 @@ inline std::string _impl_Printf(_Printf_flags& flags, int32_t p) { return _impl_
 inline std::string _impl_Printf(_Printf_flags& flags, uint8_t p) { return _impl_Printf(flags, int64_t(p)); }
 inline std::string _impl_Printf(_Printf_flags& flags, uint16_t p) { return _impl_Printf(flags, int64_t(p)); }
 inline std::string _impl_Printf(_Printf_flags& flags, uint32_t p) { return _impl_Printf(flags, int64_t(p)); }
+inline std::string _impl_Printf(_Printf_flags& flags, uint64_t p) { return _impl_Printf(flags, int64_t(p)); }
 inline std::string _impl_Printf(_Printf_flags& flags, bool p) { return _impl_Printf(flags, int64_t(p)); }
 
 std::string _impl_Printf(_Printf_flags& flags, void* p);

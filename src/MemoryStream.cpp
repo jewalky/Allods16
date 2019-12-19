@@ -45,3 +45,23 @@ uint64_t MemoryStream::WriteBytes(const void* buffer, uint64_t count)
 	memcpy(mBuffer.data() + mPosition, buffer, count);
 	return count;
 }
+
+void MemoryStream::Clear()
+{
+	mPosition = 0;
+	mBuffer.clear();
+}
+
+void MemoryStream::SetBuffer(const std::vector<uint8_t>& buffer)
+{
+	mPosition = 0;
+	mBuffer = buffer;
+}
+
+void MemoryStream::SetBuffer(const uint8_t* buffer, uint64_t size)
+{
+	mPosition = 0;
+	mBuffer.resize(size);
+	memcpy(mBuffer.data(), buffer, size);
+
+}

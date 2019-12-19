@@ -107,3 +107,23 @@ std::string Stream::WriteString(const std::string& s, uint64_t len)
 	w.shrink_to_fit();
 	return w;
 }
+
+std::string Stream::ReadLine()
+{
+	std::string o;
+	while (char c = ReadChar())
+	{
+		if (IsEOF()) break;
+		if (c == '\n') break;
+		if (c == '\r') continue;
+		o += c;
+	}
+	return o;
+}
+
+std::string Stream::WriteLine(const std::string& line)
+{
+	WriteBytes(line.data(), line.length());
+	WriteChar('\n');
+	return line;
+}

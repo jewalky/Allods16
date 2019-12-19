@@ -9,11 +9,7 @@ File::File(const std::string& path, FileOpenFlags flags)
 
 File::~File()
 {
-	if (mFile)
-	{
-		fclose((FILE*)mFile);
-		mFile = nullptr;
-	}
+	Close();
 }
 
 bool File::Open()
@@ -42,6 +38,15 @@ bool File::Open()
 	fopen_s((FILE**)&mFile, mPath.c_str(), fopenFlags.c_str());
 	return (mFile != nullptr);
 		
+}
+
+void File::Close()
+{
+	if (mFile != nullptr)
+	{
+		fclose((FILE*)mFile);
+		mFile = nullptr;
+	}
 }
 
 bool File::IsValid()

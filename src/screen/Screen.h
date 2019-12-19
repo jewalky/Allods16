@@ -12,6 +12,7 @@ public:
 	Screen(int w, int h);
 	virtual ~Screen();
 
+	operator bool() { return IsValid(); }
 	bool IsValid();
 
 	Color* GetBuffer();

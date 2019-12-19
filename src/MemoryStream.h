@@ -20,7 +20,14 @@ public:
 	virtual uint64_t ReadBytes(void* buffer, uint64_t count);
 	virtual uint64_t WriteBytes(const void* buffer, uint64_t count);
 
+	//
+	void Clear();
+	void SetBuffer(const std::vector<uint8_t>& buffer);
+	void SetBuffer(const uint8_t* buffer, uint64_t count);
+
 private:
 	std::vector<uint8_t> mBuffer;
 	uint64_t mPosition;
+
+	MemoryStream(const MemoryStream& s) {};
 };

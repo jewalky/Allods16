@@ -18,6 +18,7 @@ public:
 	virtual ~File();
 
 	bool Open();
+	void Close();
 
 	virtual bool IsValid();
 	virtual bool IsEOF();
@@ -35,4 +36,6 @@ private:
 	std::string mPath;
 	FileOpenFlags mFlags;
 	void* mFile;
+
+	File(const File& f) {};
 };
