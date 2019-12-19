@@ -86,7 +86,7 @@ int Application::Run()
 	ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
 
 	ImageTruecolor* img = new ImageTruecolor("main/graphics/mainmenu/menu_.bmp");
-	img->Draw(ctx, -16, -16);
+	img->Draw(ctx, 0, 0);
 
 	while (!mExiting)
 	{

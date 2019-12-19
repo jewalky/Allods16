@@ -69,7 +69,7 @@ void ImageTruecolor::DrawPartial(DrawingContext& ctx, int32_t x, int32_t y, cons
 	Rect screenRec = Rect::FromXYWH(x, y, innerRect.w, innerRect.h).GetIntersection(viewRec);
 	if (screenRec.w > mWidth) screenRec.w = mWidth;
 	if (screenRec.h > mHeight) screenRec.h = mHeight;
-	Rect clipRec = Rect::FromLTRB(screenRec.x - x + innerRect.x, screenRec.y - y + innerRect.y, screenRec.w, screenRec.h).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
+	Rect clipRec = Rect::FromXYWH(screenRec.x - x + innerRect.x, screenRec.y - y + innerRect.y, screenRec.w, screenRec.h).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
 	
 	Color* screenBuffer = ctx.GetBuffer() + screenRec.y * ctx.GetPitch() + screenRec.x;
 	Color* buffer = mPixels.data() + clipRec.y * mWidth + clipRec.x;
@@ -90,7 +90,7 @@ void ImageTruecolor::BlitPartial(DrawingContext& ctx, int32_t x, int32_t y, cons
 	Rect screenRec = Rect::FromXYWH(x, y, innerRect.w, innerRect.h).GetIntersection(viewRec);
 	if (screenRec.w > mWidth) screenRec.w = mWidth;
 	if (screenRec.h > mHeight) screenRec.h = mHeight;
-	Rect clipRec = Rect::FromLTRB(screenRec.x - x + innerRect.x, screenRec.y - y + innerRect.y, screenRec.w, screenRec.h).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
+	Rect clipRec = Rect::FromXYWH(screenRec.x - x + innerRect.x, screenRec.y - y + innerRect.y, screenRec.w, screenRec.h).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
 
 	Color* screenBuffer = ctx.GetBuffer() + screenRec.y * ctx.GetPitch() + screenRec.x;
 	Color* buffer = mPixels.data() + clipRec.y * mWidth + clipRec.x;
