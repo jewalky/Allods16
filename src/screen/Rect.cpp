@@ -81,12 +81,8 @@ bool Rect::Contains(const Point& p) const
 
 bool Rect::Intersects(const Rect& r) const
 {
-	return
-		((GetLeft() >= r.GetLeft() && GetLeft() <= r.GetRight()) ||
-		(GetRight() >= r.GetLeft() && GetRight() <= r.GetRight()))
-		&&
-		((GetTop() >= r.GetTop() && GetTop() <= r.GetBottom()) ||
-		(GetBottom() >= r.GetTop() && GetBottom() <= r.GetBottom()));
+	return !(GetLeft() < r.GetRight() && GetRight() > r.GetLeft() &&
+		GetTop() > r.GetBottom() && GetBottom() < r.GetTop());
 }
 
 Rect Rect::GetIntersection(const Rect& r) const

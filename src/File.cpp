@@ -18,10 +18,10 @@ bool File::Open()
 	std::string fopenFlags = "";
 	bool havePlus = false;
 	
-	if ((mFlags & (File_OpenTruncate|File_OpenWrite)) == (File_OpenTruncate|File_OpenWrite))
+	if ((mFlags & (FileOpenFlags::Truncate|FileOpenFlags::Write)) == (FileOpenFlags::Truncate|FileOpenFlags::Write))
 	{
 		fopenFlags += "w";
-		havePlus = !!(mFlags & File_OpenRead);
+		havePlus = (mFlags & FileOpenFlags::Read) != FileOpenFlags::NoFlags;
 	}
 	else
 	{
@@ -29,7 +29,7 @@ bool File::Open()
 		havePlus = true;
 	}
 
-	if (!(mFlags & File_OpenText))
+	if ((mFlags & FileOpenFlags::Text) == FileOpenFlags::NoFlags)
 		fopenFlags += "b";
 
 	if (havePlus)
@@ -61,12 +61,12 @@ bool File::IsEOF()
 
 bool File::IsWritable()
 {
-	return !!(mFlags & File_OpenWrite);
+	return (mFlags & FileOpenFlags::Write) != FileOpenFlags::NoFlags;
 }
 
 bool File::IsReadable()
 {
-	return !!(mFlags & File_OpenRead);
+	return (mFlags & FileOpenFlags::Read) != FileOpenFlags::NoFlags;
 }
 
 uint64_t File::GetLength()
@@ -110,6 +110,9 @@ uint64_t File::ReadBytes(void* buffer, uint64_t count)
 	if (mFile == nullptr)
 		return 0;
 
+	if ((mFlags & FileOpenFlags::Read) == FileOpenFlags::NoFlags)
+		return 0;
+
 	return fread(buffer, 1, size_t(count), (FILE*)mFile);
 
 }
@@ -118,6 +121,9 @@ uint64_t File::WriteBytes(const void* buffer, uint64_t count)
 {
 	
 	if (mFile == nullptr)
+		return 0;
+
+	if ((mFlags & FileOpenFlags::Write) == FileOpenFlags::NoFlags)
 		return 0;
 
 	return fwrite(buffer, 1, size_t(count), (FILE*)mFile);

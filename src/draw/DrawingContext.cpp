@@ -18,10 +18,10 @@ DrawingContext::DrawingContext(Screen* s, Rect viewport)
 
 Color* DrawingContext::GetBuffer()
 {
-	return mScreen->GetBuffer() + mViewport.y * mPitch + mViewport.x;
+    return mScreen->GetBuffer();
 }
 
-int DrawingContext::GetPitch()
+int32_t DrawingContext::GetPitch()
 {
 	return mPitch;
 }
@@ -114,6 +114,9 @@ void DrawingContext::DrawLine(const Point& v1, const Point& v2, Color c)
     {
         return;
     }
+
+    dx = x2 - x1;
+    dy = y2 - y1;
 
     //
     // brezenham

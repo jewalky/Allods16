@@ -95,7 +95,7 @@ std::string Stream::ReadString(uint64_t len)
 	buf[len] = 0;
 	ReadBytes(buf, len);
 	std::string o(buf);
-	delete buf;
+	delete[] buf;
 	return o;
 }
 

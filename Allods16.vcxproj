@@ -153,6 +153,8 @@
   <ItemGroup>
     <ClCompile Include="Allods16.cpp" />
     <ClCompile Include="src\data\Resource.cpp" />
+    <ClCompile Include="src\data\Sprite.cpp" />
+    <ClCompile Include="src\data\Sprite16A.cpp" />
     <ClCompile Include="src\draw\DrawingContext.cpp" />
     <ClCompile Include="src\File.cpp" />
     <ClCompile Include="src\logging.cpp" />
@@ -162,6 +164,7 @@
     <ClCompile Include="src\screen\Rect.cpp" />
     <ClCompile Include="src\screen\Screen.cpp" />
     <ClCompile Include="src\Stream.cpp" />
+    <ClCompile Include="src\ui\Mouse.cpp" />
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -169,6 +172,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\data\Resource.h" />
+    <ClInclude Include="src\data\Sprite.h" />
+    <ClInclude Include="src\data\Sprite16A.h" />
     <ClInclude Include="src\draw\DrawingContext.h" />
     <ClInclude Include="src\File.h" />
     <ClInclude Include="src\logging.h">
@@ -182,6 +187,7 @@
     <ClInclude Include="src\screen\Rect.h" />
     <ClInclude Include="src\screen\Screen.h" />
     <ClInclude Include="src\Stream.h" />
+    <ClInclude Include="src\ui\Mouse.h" />
     <ClInclude Include="src\utils.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
       </ExcludedFromBuild>

@@ -13,17 +13,17 @@ Resource::Resource(const std::string& filename)
 
 bool Resource::OpenTreeTraverse(Stream& f, Entry& e, uint32_t fat_offset, uint32_t first, uint32_t last)
 {
-	f.SetPosition(uint64_t(fat_offset) + uint64_t(first) * 0x20);
 	for (uint32_t i = first; i < last; i++)
 	{
-		f.SetPosition(f.GetPosition() + 4);
+		f.SetPosition(uint64_t(fat_offset) + uint64_t(i) * 0x20 + 4);
 		
-		Entry childEntry;
+		e.mChildren.push_back(Entry());
+		Entry& childEntry = e.mChildren.back();
 
 		uint32_t e_offset = f.ReadUInt32();
 		uint32_t e_size = f.ReadUInt32();
 		uint32_t e_type = f.ReadUInt32();
-		
+
 		childEntry.mName = ToLower(f.ReadString(16));
 		
 		if (e_type == 1)
@@ -52,7 +52,7 @@ bool Resource::OpenTreeTraverse(Stream& f, Entry& e, uint32_t fat_offset, uint32
 bool Resource::Open()
 {
 	
-	File f(mPath, File_OpenRead);
+	File f(mPath, FileOpenFlags::Read);
 	if (!f.Open())
 	{
 		Printf("Warning: couldn't open \"%s\"", mPath);
@@ -141,7 +141,10 @@ bool Resource::ReadFile(MemoryStream& target, const std::string& path)
 	Entry* entry = FindEntry(path);
 	if (!entry) return false;
 
-	File f(mPath, File_OpenRead);
+	if (entry->mIsDirectory)
+		return false;
+
+	File f(mPath, FileOpenFlags::Read);
 	if (!f.Open())
 	{
 		Printf("Warning: couldn't open \"%s\": file is gone", mPath);
@@ -200,7 +203,7 @@ bool ResourceManager::ReadFile(MemoryStream& target, const std::string& path)
 {
 	
 	// first try real filesystem
-	File f(path, File_OpenRead);
+	File f(path, FileOpenFlags::Read);
 	if (f.Open())
 	{
 		std::vector<uint8_t> bytes;

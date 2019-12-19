@@ -4,6 +4,7 @@
 
 #include "draw/DrawingContext.h"
 #include "data/Resource.h"
+#include "data/Sprite16A.h"
 
 #include <iostream>
 
@@ -46,6 +47,11 @@ ResourceManager* Application::GetResources()
 	return mResources;
 }
 
+Mouse* Application::GetMouse()
+{
+	return mMouse;
+}
+
 void Application::Exit()
 {
 	mExiting = true;
@@ -58,6 +64,11 @@ void Application::Abort(std::string message)
 	exit(3);
 }
 
+uint64_t Application::GetTicks()
+{
+	return uint64_t(SDL_GetTicks());
+}
+
 int Application::Run()
 {
 	mScreen = new Screen(640, 480);
@@ -68,6 +79,11 @@ int Application::Run()
 	}
 
 	mResources = new ResourceManager();
+	mMouse = new Mouse();
+	mMouse->SetCursor(Mouse::Default);
+
+	DrawingContext ctx(mScreen);
+	ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
 
 	while (!mExiting)
 	{
@@ -75,11 +91,9 @@ int Application::Run()
 		while (mScreen->PollEvent(ev))
 			HandleEvent(&ev);
 
-		DrawingContext ctx(mScreen);
-		ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
-		ctx.DrawLine(Point(640, 480), Point(0, 0), Color(255, 255, 255, 128));
-
+		mMouse->PreApply();
 		mScreen->Apply();
+		mMouse->PostApply();
 		SDL_Delay(1);
 	}
 	
@@ -92,6 +106,9 @@ void Application::HandleEvent(const SDL_Event* ev)
 	{
 	case SDL_QUIT:
 		mExiting = true;
+		break;
+	case SDL_MOUSEMOTION:
+		mMouse->SetPosition(Point(ev->motion.x, ev->motion.y));
 		break;
 	default:
 		break;

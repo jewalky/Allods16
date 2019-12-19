@@ -4,6 +4,7 @@
 #include <string>
 #include "screen/Screen.h"
 #include "data/Resource.h"
+#include "ui/Mouse.h"
 
 class Application
 {
@@ -18,8 +19,11 @@ public:
 	void Exit();
 	void Abort(std::string message);
 
+	static uint64_t GetTicks();
+
 	//
 	ResourceManager* GetResources();
+	Mouse* GetMouse();
 
 private:
 	Application();
@@ -36,4 +40,5 @@ private:
 
 	//
 	ResourceManager* mResources;
+	Mouse* mMouse;
 };

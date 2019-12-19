@@ -1,5 +1,6 @@
 #include "Screen.h"
 #include "../logging.h"
+#include "../Application.h"
 
 Screen::Screen(int w, int h)
 {
@@ -26,6 +27,8 @@ Screen::Screen(int w, int h)
 		return;
 	}
 
+	SDL_ShowCursor(0);
+
 	mSurface = SDL_GetWindowSurface(mWindow);
 	if (!mSurface)
 	{
@@ -36,6 +39,9 @@ Screen::Screen(int w, int h)
 	}
 
 	mViewport = Rect::FromXYWH(0, 0, w, h);
+
+	mFPS = 0;
+	mFPSTimer = 0;
 
 }
 
@@ -70,10 +76,25 @@ void Screen::Apply()
 {
 	if (mWindow == nullptr)
 		return;
+	if (!mFPSTimer)
+		mFPSTimer = Application::GetTicks();
+	mFPSLast++;
+	if (Application::GetTicks() - mFPSTimer > 1000)
+	{
+		mFPS = mFPSLast;
+		mFPSLast = 0;
+		mFPSTimer = Application::GetTicks();
+		SDL_SetWindowTitle(mWindow, Format("Allods (%d FPS)", mFPS).c_str());
+	}
 	SDL_UpdateWindowSurface(mWindow);
 }
 
 bool Screen::PollEvent(SDL_Event& ev)
 {
 	return SDL_PollEvent(&ev);
+}
+
+uint64_t Screen::GetFPS()
+{
+	return mFPS;
 }

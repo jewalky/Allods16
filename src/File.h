@@ -2,13 +2,24 @@
 
 #include "Stream.h"
 
-enum FileOpenFlags
+enum class FileOpenFlags : uint16_t
 {
-	File_OpenRead = 0x0001,
-	File_OpenWrite = 0x0002,
-	File_OpenTruncate = 0x0004,
-	File_OpenText = 0x0008
+	NoFlags = 0x0000,
+	Read = 0x0001,
+	Write = 0x0002,
+	Truncate = 0x0004,
+	Text = 0x0008
 };
+
+inline FileOpenFlags operator|(FileOpenFlags lhs, FileOpenFlags rhs)
+{
+	return static_cast<FileOpenFlags>(static_cast<uint16_t>(lhs) | static_cast<uint16_t>(rhs));
+}
+
+inline FileOpenFlags operator&(FileOpenFlags lhs, FileOpenFlags rhs)
+{
+	return static_cast<FileOpenFlags>(static_cast<uint16_t>(lhs) & static_cast<uint16_t>(rhs));
+}
 
 // a Stream backed by C file API
 class File : public Stream
