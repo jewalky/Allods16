@@ -22,6 +22,8 @@ public:
 	void FromScreen(const Rect& screenRect);
 	Color* GetBuffer();
 
+	void MoveInPlace(int32_t offsX, int32_t offsY);
+
 private:
 	uint32_t mWidth;
 	uint32_t mHeight;

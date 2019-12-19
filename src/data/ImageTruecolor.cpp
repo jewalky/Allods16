@@ -135,3 +135,42 @@ Color* ImageTruecolor::GetBuffer()
 {
 	return mPixels.data();
 }
+
+void ImageTruecolor::MoveInPlace(int32_t offsX, int32_t offsY)
+{
+	if (offsX == 0 && offsY == 0)
+		return;
+
+	if (offsX + int32_t(mWidth) <= 0 || offsY + int32_t(mHeight) <= 0 || offsX > int32_t(mWidth) || offsY > int32_t(mHeight))
+		return;
+
+	Color* buffer = mPixels.data();
+	bool isBackwards = int32_t(mWidth) * offsY + offsX >= 0;
+	Rect copyRect = Rect::FromXYWH(offsX, offsY, mWidth, mHeight).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
+	Printf("copyRect = %d,%d,%d,%d; isBackwards = %d", copyRect.x, copyRect.y, copyRect.w, copyRect.h, isBackwards);
+
+	if (!isBackwards)
+	{
+		Color* copyTo = buffer + copyRect.y * mWidth + copyRect.x;
+		buffer = buffer + (copyRect.y-offsY) * mWidth + (copyRect.x-offsX);
+		for (int y = copyRect.GetTop(); y < copyRect.GetBottom(); y++)
+		{
+			for (int x = copyRect.GetLeft(); x < copyRect.GetRight(); x++)
+				*copyTo++ = *buffer++;
+			copyTo += mWidth - copyRect.w;
+			buffer += mWidth - copyRect.w;
+		}
+	}
+	else
+	{
+		Color* copyTo = buffer + mWidth * mHeight - (copyRect.y-offsY) * mWidth - (copyRect.x-offsX);
+		buffer = buffer + mWidth * mHeight - copyRect.y * mWidth - copyRect.x;
+		for (int y = copyRect.GetBottom() - 1; y >= copyRect.GetTop(); y--)
+		{
+			for (int x = copyRect.GetRight() - 1; x >= copyRect.GetLeft(); x--)
+				*copyTo-- = *buffer--;
+			copyTo -= mWidth - copyRect.w;
+			buffer -= mWidth - copyRect.w;
+		}
+	}
+}
