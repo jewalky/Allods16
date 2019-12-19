@@ -1,24 +1,40 @@
 #include "DrawingContext.h"
 #include "../logging.h"
+#include "../data/ImageTruecolor.h"
 
 DrawingContext::DrawingContext(Screen* s)
 {
-	mScreen = s;
-	mViewport = mScreen->GetViewport();
+	mViewport = s->GetViewport();
 	mPitch = mViewport.w;
+    mBuffer = s->GetBuffer();
 }
 
-DrawingContext::DrawingContext(Screen* s, Rect viewport)
+DrawingContext::DrawingContext(Screen* s, const Rect& viewport)
 {
-	mScreen = s;
-	Rect screenViewport = mScreen->GetViewport();
+	Rect screenViewport = s->GetViewport();
 	mViewport = screenViewport.GetIntersection(viewport);
 	mPitch = screenViewport.w;
+    mBuffer = s->GetBuffer();
+}
+
+DrawingContext::DrawingContext(ImageTruecolor* image)
+{
+    mViewport = Rect::FromXYWH(0, 0, image->GetWidth(), image->GetHeight());
+    mPitch = mViewport.w;
+    mBuffer = image->GetBuffer();
+}
+
+DrawingContext::DrawingContext(ImageTruecolor* image, const Rect& viewport)
+{
+    Rect imageViewport = Rect::FromXYWH(0, 0, image->GetWidth(), image->GetHeight());
+    mViewport = imageViewport.GetIntersection(viewport);
+    mPitch = mViewport.w;
+    mBuffer = image->GetBuffer();
 }
 
 Color* DrawingContext::GetBuffer()
 {
-    return mScreen->GetBuffer();
+    return mBuffer;
 }
 
 int32_t DrawingContext::GetPitch()

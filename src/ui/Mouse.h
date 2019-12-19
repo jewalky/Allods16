@@ -11,6 +11,7 @@ class Mouse
 public:
 
 	Mouse();
+	~Mouse();
 
 	// draw mouse
 	void PreApply();
@@ -92,7 +93,6 @@ private:
 	Point mPosition;
 
 	// stores saved screen rect
-	// manual blitting for now
-	std::vector<Color> mSavedBuffer;
+	ImageTruecolor* mSavedBuffer;
 	Rect mSavedRect;
 };

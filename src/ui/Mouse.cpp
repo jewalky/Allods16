@@ -2,6 +2,7 @@
 #include "../data/Sprite16A.h"
 #include "../Application.h"
 #include "../logging.h"
+#include "../data/ImageTruecolor.h"
 
 Mouse::Mouse()
 {
@@ -9,6 +10,12 @@ Mouse::Mouse()
 	mInternalCursors[Default].Set(new Sprite16A("graphics/cursors/default/sprites.16a"), 4, 4, -1, false);
 	mInternalCursors[Wait].Set(new Sprite16A("graphics/cursors/wait/sprites.16a"), 16, 16, 40, false);
 	mCurrentCursor = nullptr;
+	mSavedBuffer = new ImageTruecolor(0, 0);
+}
+
+Mouse::~Mouse()
+{
+	delete mSavedBuffer;
 }
 
 void Mouse::PreApply()
@@ -27,16 +34,7 @@ void Mouse::PreApply()
 		mCurrentCursor->mSprite->GetHeight(mCurrentCursor->mAnimFrame)
 	).GetIntersection(viewport);
 
-	mSavedBuffer.resize(curMouseRect.w * curMouseRect.h);
-	Color* screenBuffer = screen->GetBuffer() + curMouseRect.y * viewport.w + curMouseRect.x;
-	Color* buffer = mSavedBuffer.data();
-	for (int y = curMouseRect.GetTop(); y < curMouseRect.GetBottom(); y++)
-	{
-		for (int x = curMouseRect.GetLeft(); x < curMouseRect.GetRight(); x++)
-			*buffer++ = *screenBuffer++;
-		screenBuffer += viewport.w - curMouseRect.w;
-	}
-
+	mSavedBuffer->FromScreen(curMouseRect);
 	mSavedRect = curMouseRect;
 
 	// render mouse
@@ -56,16 +54,8 @@ void Mouse::PostApply()
 		return;
 
 	Screen* screen = Application::GetInstance()->GetScreen();
-	Rect viewport = screen->GetViewport();
-
-	Color* screenBuffer = screen->GetBuffer() + mSavedRect.y * viewport.w + mSavedRect.x;
-	Color* buffer = mSavedBuffer.data();
-	for (int y = mSavedRect.GetTop(); y < mSavedRect.GetBottom(); y++)
-	{
-		for (int x = mSavedRect.GetLeft(); x < mSavedRect.GetRight(); x++)
-			*screenBuffer++ = *buffer++;
-		screenBuffer += viewport.w - mSavedRect.w;
-	}
+	DrawingContext toScreen(screen);
+	mSavedBuffer->Blit(toScreen, mSavedRect.x, mSavedRect.y);
 
 }
 

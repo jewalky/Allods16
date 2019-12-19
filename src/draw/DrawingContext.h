@@ -2,11 +2,15 @@
 
 #include "../screen/Screen.h"
 
+class ImageTruecolor;
 class DrawingContext
 {
 public:
 	DrawingContext(Screen* screen);
-	DrawingContext(Screen* screen, Rect subrect);
+	DrawingContext(Screen* screen, const Rect& subrect);
+
+	DrawingContext(ImageTruecolor* image);
+	DrawingContext(ImageTruecolor* image, const Rect& subrect);
 
 	Color* GetBuffer();
 	// this is NOT in bytes, this is in pixels
@@ -43,7 +47,7 @@ public:
 	}
 
 private:
-	Screen* mScreen;
+	Color* mBuffer;
 	int32_t mPitch;
 	Rect mViewport;
 };

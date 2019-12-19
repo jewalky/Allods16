@@ -24,6 +24,7 @@ public:
 	void Clear();
 	void SetBuffer(const std::vector<uint8_t>& buffer);
 	void SetBuffer(const uint8_t* buffer, uint64_t count);
+	const std::vector<uint8_t>& GetBuffer();
 
 private:
 	std::vector<uint8_t> mBuffer;

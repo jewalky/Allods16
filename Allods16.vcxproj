@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Allods16.cpp" />
+    <ClCompile Include="src\data\ImageTruecolor.cpp" />
     <ClCompile Include="src\data\Resource.cpp" />
     <ClCompile Include="src\data\Sprite.cpp" />
     <ClCompile Include="src\data\Sprite16A.cpp" />
@@ -171,6 +172,8 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\data\Image.h" />
+    <ClInclude Include="src\data\ImageTruecolor.h" />
     <ClInclude Include="src\data\Resource.h" />
     <ClInclude Include="src\data\Sprite.h" />
     <ClInclude Include="src\data\Sprite16A.h" />

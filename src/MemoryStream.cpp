@@ -65,3 +65,8 @@ void MemoryStream::SetBuffer(const uint8_t* buffer, uint64_t size)
 	memcpy(mBuffer.data(), buffer, size);
 
 }
+
+const std::vector<uint8_t>& MemoryStream::GetBuffer()
+{
+	return mBuffer;
+}

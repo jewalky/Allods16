@@ -4,7 +4,7 @@
 
 #include "draw/DrawingContext.h"
 #include "data/Resource.h"
-#include "data/Sprite16A.h"
+#include "data/ImageTruecolor.h"
 
 #include <iostream>
 
@@ -84,6 +84,9 @@ int Application::Run()
 
 	DrawingContext ctx(mScreen);
 	ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
+
+	ImageTruecolor* img = new ImageTruecolor("main/graphics/mainmenu/menu_.bmp");
+	img->Draw(ctx, -16, -16);
 
 	while (!mExiting)
 	{
