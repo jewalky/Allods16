@@ -67,77 +67,85 @@ void DrawingContext::DrawPoint(const Point& p, Color c)
     AlphaBlend(c, *buf);
 }
 
-void DrawingContext::DrawLine(const Point& v1, const Point& v2, Color c)
+static int _sign(int x)
+{
+    if (x < 0) return -1;
+    if (x > 0) return 1;
+    return 0;
+}
+
+void DrawingContext::DrawLine(const Point& v1, const Point& v2, Color c, uint32_t mask)
 {
 
-	int dx = abs(v1.x - v2.x), dy = abs(v1.y - v2.y);
-	int p = 2 * dy - dx;
-	int twoDy = 2 * dy, twoDyDx = 2 * (dy - dx);
-	int x, y, xEnd;
-	/*Determine which points to start and End */
-	if (v1.x > v2.x) {
-		x = v2.x;
-		y = v2.y;
-		xEnd = v1.x;
-	}
-	else {
-		x = v1.x; y = v1.y; xEnd = v2.x;
-	}
+	int x1 = v1.x, y1 = v1.y;
+	int x2 = v2.x, y2 = v2.y;
 
-	int ydiff = 1;
-	if (v2.y < v1.y)
-		ydiff = -1;
-	
-	Color* buffer = GetBuffer() + y * mPitch + x;
+    // Distance of the line
+    int dx = x2 - x1;
+    int dy = y2 - y1;
 
-	if (v1.x == v2.x)
-	{
-		if (v1.x < mViewport.GetLeft() || v1.x >= mViewport.GetRight())
-			return;
-		int32_t yMin = std::min(v1.y, v2.y);
-		int32_t yMax = std::max(v1.y, v2.y);
-		int32_t from = std::max(mViewport.GetTop(), yMin);
-		int32_t to = std::min(mViewport.GetBottom(), yMax);
-		buffer += (from - yMin) * mPitch;
-		for (int32_t y = from; y < to; y++)
-		{
-			AlphaBlend(c, *buffer);
-			buffer += mPitch;
-		}
-		return;
-	}
-	else if (v1.y == v2.y)
-	{
-		if (v1.y < mViewport.GetTop() || v1.y >= mViewport.GetBottom())
-			return;
-		int32_t xMin = std::min(v1.x, v2.x);
-		int32_t xMax = std::max(v1.x, v2.x);
-		int32_t from = std::max(mViewport.GetLeft(), xMin);
-		int32_t to = std::min(mViewport.GetRight(), xMax);
-		buffer += (from - xMin);
-		for (int32_t x = from; x < to; x++)
-			AlphaBlend(c, *buffer++);
-		return;
-	}
+    // Positive (absolute) distance
+    int dxabs = abs(dx);
+    int dyabs = abs(dy);
 
-	if (mViewport.Contains(Point(x, y)))
-		AlphaBlend(c, *buffer);
+    // Half distance
+    int x = dyabs >> 1;
+    int y = dxabs >> 1;
 
-	while (x < xEnd) {
-		x++;
-		buffer++;
-		if (p < 0) {
-			p = p + twoDy;
-		}
-		else {
-			y += ydiff;
-			buffer += mPitch * ydiff;
-			p = p + twoDyDx;
-		}
-		if (mViewport.Contains(Point(x, y)))
-			AlphaBlend(c, *buffer);
-	}
+    // Direction
+    int sdx = _sign(dx);
+    int sdy = _sign(dy);
 
+    // Start position
+    int px = x1;
+    int py = y1;
+
+    // Draw first pixel
+    if ((px >= mViewport.GetLeft()) && (px < mViewport.GetRight()) && (py >= mViewport.GetTop()) && (py < mViewport.GetBottom()))
+        AlphaBlend(c, *(mBuffer + py * mPitch + px));
+
+    // Check if the line is more horizontal than vertical
+    if (dxabs >= dyabs)
+    {
+        for (int i = 0; i < dxabs; i++)
+        {
+            y += dyabs;
+            if (y >= dxabs)
+            {
+                y -= dxabs;
+                py += sdy;
+            }
+            px += sdx;
+
+            // Draw pixel
+            if ((mask & (1 << (i & 0x7))) != 0)
+            {
+                if ((px >= mViewport.GetLeft()) && (px < mViewport.GetRight()) && (py >= mViewport.GetTop()) && (py < mViewport.GetBottom()))
+                    AlphaBlend(c, *(mBuffer + py * mPitch + px));
+            }
+        }
+    }
+    // Else the line is more vertical than horizontal
+    else
+    {
+        for (int i = 0; i < dyabs; i++)
+        {
+            x += dxabs;
+            if (x >= dyabs)
+            {
+                x -= dyabs;
+                px += sdx;
+            }
+            py += sdy;
+
+            // Draw pixel
+            if ((mask & (1 << (i & 0x7))) != 0)
+            {
+                if ((px >= mViewport.GetLeft()) && (px < mViewport.GetRight()) && (py >= mViewport.GetTop()) && (py < mViewport.GetBottom()))
+                    AlphaBlend(c, *(mBuffer + py * mPitch + px));
+            }
+        }
+    }
 
 }
 

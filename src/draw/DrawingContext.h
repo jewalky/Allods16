@@ -19,7 +19,7 @@ public:
 
 	// primitive drawing
 	void DrawPoint(const Point& p, Color c);
-	void DrawLine(const Point& v1, const Point& v2, Color c);
+	void DrawLine(const Point& v1, const Point& v2, Color c, uint32_t mask = 0xFFFFFFFF);
 	void DrawRect(const Rect& rec, Color c);
 	// does not do alpha blending
 	void ClearRect(const Rect& rec, Color c);

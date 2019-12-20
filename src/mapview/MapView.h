@@ -63,4 +63,8 @@ private:
 	uint64_t mLastScrollTime;
 	int32_t mUIScrollX;
 	int32_t mUIScrollY;
+
+	// global terrain animation
+	uint64_t mWaterAnimTime;
+	uint64_t mWaterAnimFrame;
 };

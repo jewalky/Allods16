@@ -136,9 +136,9 @@ void MapView::SetScroll(int32_t x, int32_t y)
 	int nodesWidth = mTerrain->GetWidth() / 32;
 	int nodesHeight = mTerrain->GetHeight() / 32;
 	if (x + nodesWidth > mLogic->GetWidth() - 8)
-		x = (mLogic->GetWidth() - 8) - x + nodesWidth;
+		x = (mLogic->GetWidth() - 8) - nodesWidth;
 	if (y + nodesHeight > mLogic->GetHeight() - 8)
-		y = (mLogic->GetHeight() - 8) - y + nodesHeight;
+		y = (mLogic->GetHeight() - 8) - nodesHeight;
 	mScrollX = x;
 	mScrollY = y;
 	UpdateVisibleRect();
@@ -176,8 +176,6 @@ void MapView::DrawTerrain()
 		// mark all new tiles as NeedRedraw
 		MapNode* nodes = mLogic->GetNodes() + mVisibleRect.y * mLogic->GetWidth() + mVisibleRect.x;
 		Rect unpaddedLastVisible = mLastDrawnRect;
-		Printf("visible = %d,%d,%d,%d", mVisibleRect.x, mVisibleRect.y, mVisibleRect.w, mVisibleRect.h);
-		Printf("lastDrawn = %d,%d,%d,%d", unpaddedLastVisible.x, unpaddedLastVisible.y, unpaddedLastVisible.w, unpaddedLastVisible.h);
 		for (int y = mVisibleRect.y; y < mVisibleRect.GetBottom(); y++)
 		{
 			for (int x = mVisibleRect.x; x < mVisibleRect.GetRight(); x++)
@@ -348,5 +346,38 @@ void MapView::Draw()
 
 void MapView::FixedTick()
 {
+	
+	// check water time and animate
+	mWaterAnimTime++;
+	if (mWaterAnimTime > 8)
+	{
+		mWaterAnimFrame = (mWaterAnimFrame + 1 % 4);
+		mWaterAnimTime = 0;
+		MapNode* nodes = mLogic->GetNodes() + mVisibleRect.y * mLogic->GetWidth() + mVisibleRect.x;
+		for (int32_t y = mVisibleRect.y; y < mVisibleRect.GetBottom(); y++)
+		{
+			for (int32_t x = mVisibleRect.x; x < mVisibleRect.GetRight(); x++)
+			{
+				// animate water
+				uint16_t tile = nodes->mTile;
+				uint16_t tilenum = (tile & 0xFF0) >> 4; // base rect
+				uint16_t tilein = tile & 0x00F; // number of picture inside rect
+				if (tilenum >= 0x20 && tilenum <= 0x2F)
+				{
+					tilenum -= 0x20;
+					uint16_t tilewi = tilenum / 4;
+					uint16_t tilew = tilenum % 4;
+					uint16_t waflocal = tilewi;
+					if (mWaterAnimFrame != tilewi)
+						waflocal = ++waflocal % 4;
+					tilenum = 0x20 + (4 * waflocal) + tilew;
+					nodes->mTile = (uint16_t)((tilenum << 4) | tilein);
+					nodes->mFlags |= MapNode::NeedRedraw;
+				}
+				nodes++;
+			}
+			nodes += mLogic->GetWidth() - mVisibleRect.w;
+		}
+	}
 
 }
