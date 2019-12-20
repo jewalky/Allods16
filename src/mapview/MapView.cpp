@@ -266,22 +266,10 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& nod
 		return wouldFitInY;
 
 	// lerp brightness
-	uint8_t brightness[32 * 32];
 	uint8_t brightness1 = 16;
 	uint8_t brightness2 = 32;
 	uint8_t brightness3 = 16;
 	uint8_t brightness4 = 32;
-	uint8_t* brightnessTmp = brightness;
-	for (int ly = 0; ly < 32; ly++)
-	{
-		uint8_t lerpY1 = brightness2 * ly / 31 + brightness1 * (31 - ly) / 31;
-		uint8_t lerpY2 = brightness4 * ly / 31 + brightness3 * (31 - ly) / 31;
-		for (int lx = 0; lx < 32; lx++)
-		{
-			uint8_t lerpX = lerpY2 * lx / 31 + lerpY1 * (31 - lx) / 31;
-			*brightnessTmp++ = lerpX;
-		}
-	}
 
 	// draw tile
 	Color* buffer = mTerrain->GetBuffer();
@@ -290,8 +278,9 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& nod
 	const CompoundPalette& paletteBuffer = mTilePalettes[(node1.mTile & 0xF00) >> 8];
 	for (int lx = 0; lx < 32; lx++)
 	{
-		int hMin = node2.mHeight * lx / 31 + node1.mHeight * (31 - lx) / 31;
-		int hMax = node4.mHeight * lx / 31 + node3.mHeight * (31 - lx) / 31;
+		float fX = float(lx) / 31;
+		int hMin = node2.mHeight * fX + node1.mHeight * (1 - fX);
+		int hMax = node4.mHeight * fX + node3.mHeight * (1 - fX);
 		int yMin = y1 - hMin;
 		int yMax = y3 - hMax;
 		if (yMax < yMin)
@@ -299,26 +288,31 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& nod
 
 		// precalculate
 		int yCount = yMax - yMin;
+		float fScale = float(32) / yCount;
+		
+		float brightnessX1 = brightness1 * fX + brightness2 * (1 - fX);
+		float brightnessX2 = brightness3 * fX + brightness4 * (1 - fX);
 
 		uint8_t* tilePost = tileBuffer + lx;
 		Color* post = buffer + yMin * mTerrain->GetWidth() + lx + x1;
-		uint8_t* brightnessPost = brightness + lx;
 		for (int ly = yMin; ly < yMax; ly++)
 		{
 			if (ly >= 0 && ly < mTerrain->GetHeight())
 			{
-				int inY = (ly - yMin) * 31 / yCount;
+				int inY = (ly - yMin) * fScale;
+				float fY = float(inY) / 31;
+				int brightnessY = float(brightnessX1 * fY + brightnessX2 * (1 - fY));
 				if (inY > 31) inY = 31;
 				if (inY < 0) inY = 0;
 				uint8_t palColor = *(tilePost + inY * tileImage->GetWidth());
-				*post = paletteBuffer.GetPalette(*(brightnessPost+inY*32))[palColor];
+				*post = paletteBuffer.GetPalette(brightnessY)[palColor];
 			}
 			post += mTerrain->GetWidth();
 		}
 	}
 
-	ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x2, y2 - node2.mHeight), Color(255, 0, 0, 255));
-	ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x3, y3 - node3.mHeight), Color(255, 0, 0, 255));
+	//ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x2, y2 - node2.mHeight), Color(255, 0, 0, 255));
+	//ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x3, y3 - node3.mHeight), Color(255, 0, 0, 255));
 
 	return wouldFitInY;
 
@@ -349,9 +343,8 @@ void MapView::FixedTick()
 	
 	// check water time and animate
 	mWaterAnimTime++;
-	if (mWaterAnimTime > 8)
+	if (mWaterAnimTime > 5)
 	{
-		mWaterAnimFrame = (mWaterAnimFrame + 1 % 4);
 		mWaterAnimTime = 0;
 		MapNode* nodes = mLogic->GetNodes() + mVisibleRect.y * mLogic->GetWidth() + mVisibleRect.x;
 		for (int32_t y = mVisibleRect.y; y < mVisibleRect.GetBottom(); y++)
@@ -368,8 +361,7 @@ void MapView::FixedTick()
 					uint16_t tilewi = tilenum / 4;
 					uint16_t tilew = tilenum % 4;
 					uint16_t waflocal = tilewi;
-					if (mWaterAnimFrame != tilewi)
-						waflocal = ++waflocal % 4;
+					waflocal = ++waflocal % 4;
 					tilenum = 0x20 + (4 * waflocal) + tilew;
 					nodes->mTile = (uint16_t)((tilenum << 4) | tilein);
 					nodes->mFlags |= MapNode::NeedRedraw;

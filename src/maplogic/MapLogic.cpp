@@ -107,14 +107,14 @@ void MapLogic::Tick()
 	int64_t speedMult = 5 * (mSpeed + 1); // how many ticks in a single second
 	int64_t oneTick = 1000 / speedMult;
 	int64_t timePassed = (Application::GetTicks() - mLastTime) * speedMult;
-	if (timePassed > oneTick)
+	if (timePassed > 1000)
 	{
-		while (timePassed > oneTick)
+		while (timePassed > 1000)
 		{
 			FixedTick();
-			timePassed -= oneTick;
+			timePassed -= 1000;
+			mLastTime += oneTick;
 		}
-		mLastTime = Application::GetTicks() + timePassed;
 	}
 
 }

@@ -66,5 +66,4 @@ private:
 
 	// global terrain animation
 	uint64_t mWaterAnimTime;
-	uint64_t mWaterAnimFrame;
 };
