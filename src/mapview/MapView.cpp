@@ -116,6 +116,64 @@ bool MapView::HandleEvent(const SDL_Event* ev)
 			}
 		}
 	}
+	else if (ev->type == SDL_MOUSEMOTION)
+	{
+		mHoverX = -1;
+		mHoverY = -1;
+		if (ev->motion.x >= 0 && ev->motion.x < mTerrain->GetWidth() &&
+			ev->motion.y >= 0 && ev->motion.y < mTerrain->GetHeight())
+		{
+			float fX = float(ev->motion.x % 32) / 31;
+			int32_t cx = ev->motion.x / 32 + mScrollX;
+			int32_t cy = -1;
+			MapNode* nodes = mLogic->GetNodes() + cx + mVisibleRect.GetTop() * mLogic->GetWidth();
+			for (int32_t i = mVisibleRect.GetTop(); i <= mVisibleRect.GetBottom(); i++)
+			{
+				MapNode* node1 = nodes;
+				MapNode* node2 = nodes + 1;
+				
+				int32_t y1 = (i - mScrollY) * 32 - node1->mHeight;
+				int32_t y2 = (i - mScrollY) * 32 - node2->mHeight;
+				int32_t y = y2 * fX + y1 * (1 - fX);
+				if (y > ev->motion.y)
+				{
+					cy = i-1;
+					break;
+				}
+
+				nodes += mLogic->GetWidth();
+			}
+
+			if (cx > 0 && cy > 0 && cx < mLogic->GetWidth() && cy < mLogic->GetHeight())
+			{
+				mHoverX = cx;
+				mHoverY = cy;
+
+				// set visible
+				MapNode* nodes = mLogic->GetNodes();
+				for (int y = 0; y < mLogic->GetHeight(); y++)
+				{
+					for (int x = 0; x < mLogic->GetWidth(); x++)
+					{
+						if (abs(x - cx) < 4 && abs(y - cy) < 4)
+						{
+							nodes->mFlags |= MapNode::Discovered | MapNode::Visible;
+							nodes->mFlags |= MapNode::NeedRedraw;
+						}
+						else
+						{
+							nodes->mFlags &= ~MapNode::Visible;
+						}
+						nodes++;
+					}
+				}
+			}
+			else
+			{
+				mHoverX = mHoverY = -1;
+			}
+		}
+	}
 
 	return false;
 }
@@ -244,6 +302,9 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& nod
 	// for convenience
 	int x3 = x1, x4 = x2;
 
+	if (x2 <= 0 || x1 >= mTerrain->GetWidth())
+		return false;
+
 	int y1 = (y - mScrollY) * 32;
 	int y2 = (y - mScrollY) * 32;
 	int y3 = (y - mScrollY) * 32 + 32;
@@ -261,18 +322,14 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& nod
 
 	bool wouldFitInY = (minDrawY >= 0 && maxDrawY < mTerrain->GetHeight());
 
-	//  check if we don't need to draw this
-	if (x2 <= 0 || x1 >= mTerrain->GetWidth())
-		return wouldFitInY;
-
 	// lerp brightness
 	uint8_t brightness1 = 16;
-	uint8_t brightness2 = 32;
+	uint8_t brightness2 = 16;
 	uint8_t brightness3 = 16;
-	uint8_t brightness4 = 32;
+	uint8_t brightness4 = 16;
 
 	// draw tile
-	Color* buffer = mTerrain->GetBuffer();
+	Color* buffer = ctx.GetBuffer();
 	ImagePaletted* tileImage = mTiles[(node1.mTile & 0xFF0) >> 4];
 	uint8_t* tileBuffer = tileImage->GetBuffer() + tileImage->GetWidth() * ((node1.mTile & 0x00F) * 32);
 	const CompoundPalette& paletteBuffer = mTilePalettes[(node1.mTile & 0xF00) >> 8];
@@ -311,10 +368,231 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& nod
 		}
 	}
 
-	//ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x2, y2 - node2.mHeight), Color(255, 0, 0, 255));
-	//ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x3, y3 - node3.mHeight), Color(255, 0, 0, 255));
+	ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x2, y2 - node2.mHeight), Color(128, 0, 0, 255));
+	ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x3, y3 - node3.mHeight), Color(128, 0, 0, 255));
 
 	return wouldFitInY;
+
+}
+
+void MapView::DrawVisibility()
+{
+	MapNode* nodes = mLogic->GetNodes() + mVisibleRect.y * mLogic->GetWidth() + mVisibleRect.x;
+	for (int32_t y = mVisibleRect.y; y < mVisibleRect.GetBottom(); y++)
+	{
+		for (int32_t x = mVisibleRect.x; x < mVisibleRect.GetRight(); x++)
+		{
+			DrawVisibilityNode(x, y);
+			nodes++;
+		}
+		nodes += mLogic->GetWidth() - mVisibleRect.w;
+	}
+}
+
+static uint8_t alphaFromVisFlags(uint16_t flags)
+{
+	if (flags & MapNode::Visible)
+		return 255;
+	if (flags & MapNode::Discovered)
+		return 127;
+	return 0;
+}
+
+void MapView::DrawVisibilityNode(int32_t x, int32_t y)
+{
+
+	// get all nodes
+	MapNode* baseNodes = mLogic->GetNodes() + y * mLogic->GetWidth() + x;
+	int pitch = mLogic->GetWidth();
+	MapNode& node1 = *(baseNodes - pitch - 1);
+	MapNode& node2 = *(baseNodes - pitch);
+	MapNode& node3 = *(baseNodes - pitch + 1);
+	MapNode& node4 = *(baseNodes - 1);
+	MapNode& node5 = *(baseNodes);
+	MapNode& node6 = *(baseNodes + 1);
+	MapNode& node7 = *(baseNodes + pitch - 1);
+	MapNode& node8 = *(baseNodes + pitch);
+	MapNode& node9 = *(baseNodes + pitch + 1);
+
+	uint16_t f1 = node1.mFlags & (MapNode::Discovered|MapNode::Visible);
+	uint16_t f2 = node2.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f3 = node3.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f4 = node4.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f5 = node5.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f6 = node6.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f7 = node7.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f8 = node8.mFlags & (MapNode::Discovered | MapNode::Visible);
+	uint16_t f9 = node9.mFlags & (MapNode::Discovered | MapNode::Visible);
+
+	bool differentFlags = f5 != f1 || f5 != f2 || f5 != f3 || f5 != f4 || f5 != f6 || f5 != f7 || f5 != f8 || f5 != f9;
+
+	// node1 node2 node3
+	// node4 node5 node6
+	// node7 node8 node9
+	// node5 =drawn, center
+
+	DrawingContext ctx(Application::GetInstance()->GetScreen(), Rect::FromXYWH(0, 0, mTerrain->GetWidth(), mTerrain->GetHeight()));
+
+	int x1 = (x - mScrollX) * 32;
+	int x2 = (x - mScrollX) * 32 + 32;
+	// for convenience
+	int x3 = x1, x4 = x2;
+
+	if (x2 <= 0 || x1 >= mTerrain->GetWidth())
+		return;
+
+	int y1 = (y - mScrollY) * 32;
+	int y2 = (y - mScrollY) * 32;
+	int y3 = (y - mScrollY) * 32 + 32;
+	int y4 = (y - mScrollY) * 32 + 32;
+
+	int y1h = y1 - node5.mHeight;
+	int y2h = y2 - node6.mHeight;
+	int y3h = y3 - node8.mHeight;
+	int y4h = y4 - node9.mHeight;
+	int minDrawY = std::min(std::min(y1h, y2h), std::min(y3h, y4h));
+	int maxDrawY = std::max(std::max(y1h, y2h), std::max(y3h, y4h));
+
+	if (maxDrawY <= 0 || minDrawY >= int32_t(mTerrain->GetHeight()))
+		return;
+
+	if (!differentFlags)
+	{
+		if (node5.mFlags & MapNode::Visible)
+			return;
+
+		// draw tile
+		Color* buffer = ctx.GetBuffer();
+		for (int lx = 0; lx < 32; lx++)
+		{
+			float fX = float(lx) / 31;
+			int hMin = node6.mHeight * fX + node5.mHeight * (1 - fX);
+			int hMax = node9.mHeight * fX + node8.mHeight * (1 - fX);
+			int yMin = y1 - hMin;
+			int yMax = y3 - hMax;
+			if (yMax < yMin)
+				continue;
+
+			// precalculate
+			int yCount = yMax - yMin;
+
+			Color* post = buffer + yMin * mTerrain->GetWidth() + lx + x1;
+			for (int ly = yMin; ly < yMax; ly++)
+			{
+				if (ly >= 0 && ly < mTerrain->GetHeight())
+				{
+					if (node5.mFlags & MapNode::Discovered)
+					{
+						Color& c = *post;
+						c.components.r /= 2;
+						c.components.g /= 2;
+						c.components.b /= 2;
+					}
+					else
+					{
+						*post = Color(0, 0, 0, 0);
+					}
+				}
+				post += mTerrain->GetWidth();
+			}
+		}
+	}
+	else
+	{
+		uint8_t brightness[32 * 32];
+		uint8_t* bbuf;
+		int np1 = alphaFromVisFlags(node1.mFlags);
+		int np2 = alphaFromVisFlags(node2.mFlags);
+		int np3 = alphaFromVisFlags(node3.mFlags);
+		int np4 = alphaFromVisFlags(node4.mFlags);
+		int np5 = alphaFromVisFlags(node5.mFlags);
+		int np6 = alphaFromVisFlags(node6.mFlags);
+		int np7 = alphaFromVisFlags(node7.mFlags);
+		int np8 = alphaFromVisFlags(node8.mFlags);
+		int np9 = alphaFromVisFlags(node9.mFlags);
+
+		float topContrib = 0.5;
+		float yContrib = 0.5;
+		float bottomContrib = 0;
+		float fDelta = 1.0 / 32;
+		bbuf = brightness;
+		for (int y = 0; y < 32; y++)
+		{
+			float leftContrib = 0.5;
+			float xContrib = 0.5;
+			float rightContrib = 0;
+
+			for (int x = 0; x < 32; x++)
+			{
+				int c1 = np1 * leftContrib + np2 * xContrib + np3 * rightContrib;
+				int c2 = np4 * leftContrib + np5 * xContrib + np6 * rightContrib;
+				int c3 = np7 * leftContrib + np8 * xContrib + np9 * rightContrib;
+				int c4 = c1 * topContrib + c2 * yContrib + c3 * bottomContrib;
+
+				*bbuf++ = c4;
+
+				if (x > 15)
+				{
+					leftContrib = 0;
+					rightContrib += fDelta;
+					xContrib -= fDelta;
+				}
+				else
+				{
+					leftContrib -= fDelta;
+					xContrib += fDelta;
+				}
+			}
+
+			if (y > 15)
+			{
+				topContrib = 0;
+				bottomContrib += fDelta;
+				yContrib -= fDelta;
+			}
+			else
+			{
+				topContrib -= fDelta;
+				yContrib += fDelta;
+			}
+		}
+
+		// draw tile
+		Color* buffer = ctx.GetBuffer();
+		for (int lx = 0; lx < 32; lx++)
+		{
+			float fX = float(lx) / 31;
+			int hMin = node6.mHeight * fX + node5.mHeight * (1 - fX);
+			int hMax = node9.mHeight * fX + node8.mHeight * (1 - fX);
+			int yMin = y1 - hMin;
+			int yMax = y3 - hMax;
+			if (yMax < yMin)
+				continue;
+
+			// precalculate
+			int yCount = yMax - yMin;
+			float fScale = float(32) / yCount;
+
+			Color* post = buffer + yMin * mTerrain->GetWidth() + lx + x1;
+			uint8_t* brightnessPost = brightness + lx;
+			for (int ly = yMin; ly < yMax; ly++)
+			{
+				if (ly >= 0 && ly < mTerrain->GetHeight())
+				{
+					int inY = (ly - yMin) * fScale;
+					float fY = float(inY) / 31;
+					if (inY > 31) inY = 31;
+					if (inY < 0) inY = 0;
+					uint8_t vis = *(brightnessPost + 32 * inY);
+					Color& c = *post;
+					c.components.r = c.components.r * vis / 255;
+					c.components.g = c.components.g * vis / 255;
+					c.components.b = c.components.b * vis / 255;
+				}
+				post += mTerrain->GetWidth();
+			}
+		}
+	}
 
 }
 
@@ -335,6 +613,8 @@ void MapView::Draw()
 	const Rect& rec = GetClientRect();
 	DrawingContext ctx(Application::GetInstance()->GetScreen(), rec);
 	mTerrain->Blit(ctx, 0, 0);
+
+	DrawVisibility();
 	
 }
 

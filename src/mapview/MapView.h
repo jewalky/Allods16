@@ -39,6 +39,10 @@ private:
 	void DrawTerrain();
 	bool DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& node2, MapNode& node3, MapNode& node4);
 
+	// visibility drawing
+	void DrawVisibility();
+	void DrawVisibilityNode(int32_t x, int32_t y);
+
 	bool mOwnLogic = false;
 	std::string mOwnMapPath;
 	MapLogic* mLogic;
@@ -63,6 +67,8 @@ private:
 	uint64_t mLastScrollTime;
 	int32_t mUIScrollX;
 	int32_t mUIScrollY;
+	int32_t mHoverX;
+	int32_t mHoverY;
 
 	// global terrain animation
 	uint64_t mWaterAnimTime;
