@@ -17,6 +17,7 @@ public:
 	virtual uint64_t GetLength() = 0;
 	virtual uint64_t GetPosition() = 0;
 	virtual uint64_t SetPosition(uint64_t position) = 0;
+	virtual uint64_t SkipBytes(uint64_t numskip);
 	virtual bool IsEOF() = 0;
 
 	// generic i/o

@@ -75,7 +75,7 @@ uint64_t Application::GetTicks()
 
 int Application::Run()
 {
-	mScreen = new Screen(640, 480);
+	mScreen = new Screen(1024, 768);
 	if (!mScreen->IsValid())
 	{
 		Printf("Failed to initialize screen");
@@ -87,19 +87,24 @@ int Application::Run()
 	mMouse->SetCursor(Mouse::Default);
 	mUIRoot = new RootUIElement();
 
+	// load ALM :D
+
+
 	DrawingContext ctx(mScreen);
 	ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
 
 	// start loading a map
-	new MapView(mUIRoot);
+	new MapView(mUIRoot, "kids3.alm");
 
 	while (!mExiting)
 	{
+		mUIRoot->PropagateTick();
+		
 		SDL_Event ev;
 		while (mScreen->PollEvent(ev))
 			HandleEvent(&ev);
 
-		mUIRoot->PropagateTick();
+		mUIRoot->PropagateDraw();
 
 		mMouse->PreApply();
 		mScreen->Apply();

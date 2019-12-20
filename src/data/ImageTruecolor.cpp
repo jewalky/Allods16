@@ -50,6 +50,7 @@ ImageTruecolor::ImageTruecolor(uint32_t w, uint32_t h)
 {
 	mWidth = w;
 	mHeight = h;
+	mPixels.resize(w * h);
 }
 
 uint32_t ImageTruecolor::GetWidth()
@@ -181,8 +182,8 @@ void ImageTruecolor::MoveInPlace(int32_t offsX, int32_t offsY)
 	}
 	else
 	{
-		Color* copyTo = buffer + mWidth * mHeight - (copyRect.y-offsY) * mWidth - (copyRect.x-offsX);
-		buffer = buffer + mWidth * mHeight - copyRect.y * mWidth - copyRect.x;
+		Color* copyTo = buffer + mWidth * mHeight - (copyRect.y-offsY) * mWidth - (copyRect.x-offsX) - 1;
+		buffer = buffer + mWidth * mHeight - copyRect.y * mWidth - copyRect.x - 1;
 		for (int y = copyRect.GetBottom() - 1; y >= copyRect.GetTop(); y--)
 		{
 			for (int x = copyRect.GetRight() - 1; x >= copyRect.GetLeft(); x--)

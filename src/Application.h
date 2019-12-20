@@ -6,6 +6,7 @@
 #include "data/Resource.h"
 #include "ui/Mouse.h"
 #include "ui/RootUIElement.h"
+#include "maplogic/MapLogic.h"
 
 class Application
 {

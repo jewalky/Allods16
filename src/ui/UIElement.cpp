@@ -10,6 +10,9 @@ UIElement::UIElement(UIElement* parent)
 
 UIElement::~UIElement()
 {
+	SetParent(nullptr);
+	for (auto& child : mChildren)
+		delete child;
 }
 
 void UIElement::PropagateClip(bool haveParentResize)
@@ -26,6 +29,13 @@ void UIElement::PropagateTick()
 	Tick();
 	for (auto& child : mChildren)
 		child->PropagateTick();
+}
+
+void UIElement::PropagateDraw()
+{
+	Draw();
+	for (auto& child : mChildren)
+		child->PropagateDraw();
 }
 
 bool UIElement::PropagateEvent(const SDL_Event* ev)
@@ -98,6 +108,10 @@ void UIElement::Tick()
 {
 }
 
+void UIElement::Draw()
+{
+}
+
 bool UIElement::HandleEvent(const SDL_Event* ev)
 {
 	return false;
@@ -152,6 +166,11 @@ void UIElement::RemoveChild(UIElement* child)
 	}
 }
 
+const Rect& UIElement::GetClipRect()
+{
+	return mClipRect;
+}
+
 const Rect& UIElement::GetClientRect()
 {
 	return mClientRect;
@@ -186,12 +205,14 @@ bool UIElement::SetVisible(bool visible)
 {
 	if (visible) mFlags = mFlags | UIElementFlags::Visible;
 	else mFlags = mFlags & ~UIElementFlags::Visible;
+	return visible;
 }
 
 bool UIElement::SetTransparent(bool transparent)
 {
 	if (transparent) mFlags = mFlags | UIElementFlags::Transparent;
 	else mFlags = mFlags & ~UIElementFlags::Transparent;
+	return transparent;
 }
 
 bool UIElement::SetFocused(bool focused)
@@ -211,12 +232,14 @@ bool UIElement::SetFocused(bool focused)
 		}
 		mParent->SetFocused(true);
 	}
+	return focused;
 }
 
 bool UIElement::SetFocusable(bool focusable)
 {
 	if (focusable) mFlags = mFlags | UIElementFlags::Focusable;
 	else mFlags = mFlags & ~UIElementFlags::Focusable;
+	return focusable;
 }
 
 void UIElement::SetClientRect(const Rect& newClientRect)

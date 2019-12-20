@@ -104,3 +104,18 @@ Rect Rect::GetTranslated(const Point& p) const
 		h
 	);
 }
+
+Rect Rect::GetPadded(int numPad) const
+{
+	return Rect::FromXYWH(
+		x - numPad,
+		y - numPad,
+		w + numPad + numPad,
+		h + numPad + numPad
+	);
+}
+
+bool Rect::operator==(const Rect& other) const
+{
+	return (x == other.x && y == other.y && w == other.w && h == other.h);
+}

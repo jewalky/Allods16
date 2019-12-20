@@ -37,10 +37,12 @@ public:
 
 	void PropagateClip(bool haveParentResize);
 	void PropagateTick();
+	void PropagateDraw();
 	bool PropagateEvent(const SDL_Event* ev);
 	bool BubbleEvent(const SDL_Event* ev);
 	
 	virtual void Tick();
+	virtual void Draw();
 	virtual bool HandleEvent(const SDL_Event* ev);
 	virtual void HandleResize();
 	virtual void HandleParentResize();
@@ -50,6 +52,7 @@ public:
 	const std::vector<UIElement*>& GetChildren();
 	void RemoveChild(UIElement* child);
 
+	const Rect& GetClipRect();
 	const Rect& GetClientRect();
 
 	void SetClientRect(const Rect& newClientRect);

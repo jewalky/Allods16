@@ -104,6 +104,17 @@ uint64_t File::SetPosition(uint64_t position)
 
 }
 
+uint64_t File::SkipBytes(uint64_t num)
+{
+
+	if (mFile == nullptr)
+		return 0;
+
+	fseek((FILE*)mFile, num, SEEK_CUR);
+	return uint64_t(ftell((FILE*)mFile));
+
+}
+
 uint64_t File::ReadBytes(void* buffer, uint64_t count)
 {
 

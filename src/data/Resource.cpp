@@ -68,7 +68,7 @@ bool Resource::Open()
 
 	uint32_t root_offset = f.ReadUInt32();
 	uint32_t root_size = f.ReadUInt32();
-	f.SetPosition(f.GetPosition() + 4);
+	f.SkipBytes(4);
 	uint32_t fat_offset = f.ReadUInt32();
 
 	mRoot.mIsDirectory = true;

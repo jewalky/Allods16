@@ -127,3 +127,8 @@ std::string Stream::WriteLine(const std::string& line)
 	WriteChar('\n');
 	return line;
 }
+
+uint64_t Stream::SkipBytes(uint64_t numskip)
+{
+	return SetPosition(GetPosition() + numskip);
+}

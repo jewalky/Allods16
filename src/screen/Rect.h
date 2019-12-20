@@ -46,5 +46,10 @@ struct Rect : public SDL_Rect
 	bool Intersects(const Rect& r) const;
 	Rect GetIntersection(const Rect& r) const;
 	Rect GetTranslated(const Point& p) const;
+	Rect GetPadded(int numPad) const;
+
+	//
+	bool operator==(const Rect& other) const;
+	bool operator!=(const Rect& other) const { return !(*this == other); }
 
 };

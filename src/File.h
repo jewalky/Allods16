@@ -38,6 +38,7 @@ public:
 	virtual uint64_t GetLength();
 	virtual uint64_t GetPosition();
 	virtual uint64_t SetPosition(uint64_t position);
+	virtual uint64_t SkipBytes(uint64_t num);
 
 	// generic i/o
 	virtual uint64_t ReadBytes(void* buffer, uint64_t count);

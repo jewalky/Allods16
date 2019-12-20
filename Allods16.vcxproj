@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Allods16.cpp" />
+    <ClCompile Include="src\data\AlmLevel.cpp" />
     <ClCompile Include="src\data\ImagePaletted.cpp" />
     <ClCompile Include="src\data\ImageTruecolor.cpp" />
     <ClCompile Include="src\data\Resource.cpp" />
@@ -161,6 +162,8 @@
     <ClCompile Include="src\File.cpp" />
     <ClCompile Include="src\logging.cpp" />
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\maplogic\MapLogic.cpp" />
+    <ClCompile Include="src\mapview\CompoundPalette.cpp" />
     <ClCompile Include="src\mapview\MapView.cpp" />
     <ClCompile Include="src\MemoryStream.cpp" />
     <ClCompile Include="src\screen\Point.cpp" />
@@ -178,6 +181,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\data\AlmLevel.h" />
     <ClInclude Include="src\data\Image.h" />
     <ClInclude Include="src\data\ImagePaletted.h" />
     <ClInclude Include="src\data\ImageTruecolor.h" />
@@ -191,6 +195,8 @@
       </ExcludedFromBuild>
     </ClInclude>
     <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\maplogic\MapLogic.h" />
+    <ClInclude Include="src\mapview\CompoundPalette.h" />
     <ClInclude Include="src\mapview\MapView.h" />
     <ClInclude Include="src\MemoryStream.h" />
     <ClInclude Include="src\screen\Color.h" />

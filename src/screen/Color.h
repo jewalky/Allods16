@@ -40,4 +40,11 @@ union Color
 		value = c;
 		components.a = a;
 	}
+
+	bool operator== (const Color& other) const
+	{
+		return value == other.value;
+	}
+
+	bool operator!=(const Color& other) const { return !(*this == other); }
 };
