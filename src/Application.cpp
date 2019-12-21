@@ -109,7 +109,9 @@ int Application::Run()
 		mMouse->PreApply();
 		mScreen->Apply();
 		mMouse->PostApply();
-		SDL_Delay(1);
+
+		if (mScreen->GetFPS() > 60)
+			SDL_Delay(1);
 	}
 	
 	return 0;
