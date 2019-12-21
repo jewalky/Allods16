@@ -160,7 +160,6 @@ bool MapView::HandleEvent(const SDL_Event* ev)
 						if (abs(x - cx) < 4 && abs(y - cy) < 4)
 						{
 							flags |= MapNode::Discovered | MapNode::Visible;
-							flags |= MapNode::NeedRedraw;
 						}
 						else
 						{
@@ -169,6 +168,8 @@ bool MapView::HandleEvent(const SDL_Event* ev)
 						
 						if (flags != nodes->mFlags)
 						{
+							if ((flags & MapNode::Discovered) != (nodes->mFlags & MapNode::Discovered))
+								flags |= MapNode::NeedRedraw;
 							nodes->mFlags = flags | MapNode::NeedRedrawFOW;
 							int pitch = mLogic->GetWidth();
 							(nodes - pitch - 1)->mFlags |= MapNode::NeedRedrawFOW;
@@ -519,8 +520,11 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 		}
 	}
 
-	ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x2, y2 - node2.mHeight), Color(128, 0, 0, 255));
-	ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x3, y3 - node3.mHeight), Color(128, 0, 0, 255));
+	if (node1.mFlags & MapNode::NeedRedraw)
+	{
+		ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x2, y2 - node2.mHeight), Color(128, 0, 0, 255));
+		ctx.DrawLine(Point(x1, y1 - node1.mHeight), Point(x3, y3 - node3.mHeight), Color(128, 0, 0, 255));
+	}
 
 	return wouldFitInY;
 
@@ -598,6 +602,12 @@ void MapView::FixedTick()
 		{
 			for (int32_t x = mVisibleRect.x; x < mVisibleRect.GetRight(); x++)
 			{
+				if (!(nodes->mFlags & MapNode::Visible))
+				{
+					nodes++;
+					continue;
+				}
+
 				// animate water
 				uint16_t tile = nodes->mTile;
 				uint16_t tilenum = (tile & 0xFF0) >> 4; // base rect
