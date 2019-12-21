@@ -9,6 +9,8 @@ class ImagePaletted : public Image
 {
 public:
 	ImagePaletted(const std::string& path);
+	ImagePaletted(uint32_t w, uint32_t h);
+	ImagePaletted(uint32_t w, uint32_t h, const std::vector<Color>& palette);
 
 	virtual uint32_t GetWidth();
 	virtual uint32_t GetHeight();
@@ -21,6 +23,9 @@ public:
 	uint8_t GetPixelAt(uint32_t x, uint32_t y);
 	uint8_t* GetBuffer();
 	const std::vector<Color>& GetPalette();
+
+	void SetSize(uint32_t w, uint32_t h);
+	void MoveInPlace(int32_t offsX, int32_t offsY);
 
 private:
 	uint32_t mWidth;

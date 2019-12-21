@@ -37,11 +37,10 @@ private:
 	
 	// terrain drawing
 	void DrawTerrain();
-	bool DrawTerrainNode(int32_t x, int32_t y, MapNode& node1, MapNode& node2, MapNode& node3, MapNode& node4);
+	bool DrawTerrainNode(int32_t x, int32_t y, MapNode& node1);
 
 	// visibility drawing
 	void DrawVisibility();
-	void DrawVisibilityNode(int32_t x, int32_t y);
 
 	bool mOwnLogic = false;
 	std::string mOwnMapPath;
@@ -53,6 +52,7 @@ private:
 
 	// terrain image
 	ImageTruecolor* mTerrain;
+	ImagePaletted* mTerrainFOW;
 
 	//
 	int32_t mLastScrollX = -1;

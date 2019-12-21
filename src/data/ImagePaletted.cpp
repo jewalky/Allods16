@@ -38,6 +38,21 @@ ImagePaletted::ImagePaletted(const std::string& path)
 
 }
 
+ImagePaletted::ImagePaletted(uint32_t w, uint32_t h)
+{
+	SetSize(w, h);
+	mPalette.resize(256);
+	for (int i = 0; i < 255; i++)
+		mPalette[i] = Color(i, i, i, 255);
+}
+
+ImagePaletted::ImagePaletted(uint32_t w, uint32_t h, const std::vector<Color>& palette)
+{
+	SetSize(w, h);
+	mPalette = palette;
+	mPalette.resize(256);
+}
+
 uint32_t ImagePaletted::GetWidth()
 {
 	return mWidth;
@@ -110,4 +125,49 @@ uint8_t* ImagePaletted::GetBuffer()
 const std::vector<Color>& ImagePaletted::GetPalette()
 {
 	return mPalette;
+}
+
+void ImagePaletted::SetSize(uint32_t w, uint32_t h)
+{
+	mWidth = w;
+	mHeight = h;
+	mPixels.resize(w * h);
+}
+
+void ImagePaletted::MoveInPlace(int32_t offsX, int32_t offsY)
+{
+	if (offsX == 0 && offsY == 0)
+		return;
+
+	if (offsX + int32_t(mWidth) <= 0 || offsY + int32_t(mHeight) <= 0 || offsX > int32_t(mWidth) || offsY > int32_t(mHeight))
+		return;
+
+	uint8_t* buffer = mPixels.data();
+	bool isBackwards = int32_t(mWidth) * offsY + offsX >= 0;
+	Rect copyRect = Rect::FromXYWH(offsX, offsY, mWidth, mHeight).GetIntersection(Rect::FromXYWH(0, 0, mWidth, mHeight));
+
+	if (!isBackwards)
+	{
+		uint8_t* copyTo = buffer + copyRect.y * mWidth + copyRect.x;
+		buffer = buffer + (copyRect.y - offsY) * mWidth + (copyRect.x - offsX);
+		for (int y = copyRect.GetTop(); y < copyRect.GetBottom(); y++)
+		{
+			for (int x = copyRect.GetLeft(); x < copyRect.GetRight(); x++)
+				*copyTo++ = *buffer++;
+			copyTo += mWidth - copyRect.w;
+			buffer += mWidth - copyRect.w;
+		}
+	}
+	else
+	{
+		uint8_t* copyTo = buffer + mWidth * mHeight - (copyRect.y - offsY) * mWidth - (copyRect.x - offsX) - 1;
+		buffer = buffer + mWidth * mHeight - copyRect.y * mWidth - copyRect.x - 1;
+		for (int y = copyRect.GetBottom() - 1; y >= copyRect.GetTop(); y--)
+		{
+			for (int x = copyRect.GetRight() - 1; x >= copyRect.GetLeft(); x--)
+				*copyTo-- = *buffer--;
+			copyTo -= mWidth - copyRect.w;
+			buffer -= mWidth - copyRect.w;
+		}
+	}
 }

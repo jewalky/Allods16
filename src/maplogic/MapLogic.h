@@ -16,7 +16,8 @@ struct MapNode
 		DynamicGround		= 0x0020,
 		DynamicAir			= 0x0040,
 		BlockedTerrain		= 0x0080,
-		NeedRedraw			= 0x0100
+		NeedRedraw			= 0x0100,
+		NeedRedrawFOW		= 0x0200
 	};
 
 	uint16_t mTile;
