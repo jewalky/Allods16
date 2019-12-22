@@ -125,6 +125,10 @@ void Sprite256::DrawShadow(DrawingContext& ctx, int32_t x, int32_t y, uint32_t i
 	uint8_t* spriteData = (uint8_t*)frame.mData.data();
 
 	Rect frameRec = Rect::FromXYWH(x, y, frame.mWidth, frame.mHeight);
+	if (offset < 0)
+		frameRec.SetLeft(frameRec.GetLeft() - offset);
+	if (offset > 0)
+		frameRec.SetRight(frameRec.GetRight() + offset);
 	Rect viewRec = ctx.GetViewport();
 	if (!viewRec.Intersects(frameRec))
 		return;
