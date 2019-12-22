@@ -7,6 +7,7 @@
 #include "ui/Mouse.h"
 #include "ui/RootUIElement.h"
 #include "maplogic/MapLogic.h"
+#include "templates/TemplateLoader.h"
 
 class Application
 {
@@ -29,6 +30,7 @@ public:
 	RootUIElement* GetUIRoot();
 
 private:
+
 	Application();
 	~Application();
 	static Application* mApplication;
@@ -45,4 +47,7 @@ private:
 	ResourceManager* mResources;
 	Mouse* mMouse;
 	RootUIElement* mUIRoot;
+	// loads data.bin and .reg files
+	TemplateLoader* mTemplateLoader;
+
 };

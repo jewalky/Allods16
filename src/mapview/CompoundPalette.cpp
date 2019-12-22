@@ -3,9 +3,10 @@
 
 #include "../logging.h"
 
-void CompoundPalette::SetBasePalette(const std::vector<Color>& basePalette)
+void CompoundPalette::SetBasePalette(const Color* basePalette)
 {
-	mBasePalette = basePalette;
+	mBasePalette.resize(256);
+	memcpy(mBasePalette.data(), basePalette, sizeof(Color) * mBasePalette.size());
 	mLastTint = Color(0, 0, 0, 0);
 	mLastBrightness = 0;
 	mLastContrast = 0;

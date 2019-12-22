@@ -122,9 +122,11 @@ uint8_t* ImagePaletted::GetBuffer()
 	return mPixels.data();
 }
 
-const std::vector<Color>& ImagePaletted::GetPalette()
+const Color* ImagePaletted::GetPalette()
 {
-	return mPalette;
+	if (mPalette.size() == 0)
+		return nullptr;
+	return mPalette.data();
 }
 
 void ImagePaletted::SetSize(uint32_t w, uint32_t h)

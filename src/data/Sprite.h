@@ -15,8 +15,8 @@ public:
 	int GetHeight(uint32_t index);
 	uint32_t GetSize();
 
-	virtual void Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, const std::vector<Color>& palette) = 0;
-	const std::vector<Color>& GetPalette();
+	virtual void Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, const Color* palette) = 0;
+	const Color* GetPalette();
 
 protected:
 	Sprite() {}

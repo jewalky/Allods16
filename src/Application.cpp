@@ -93,12 +93,20 @@ int Application::Run()
 	DrawingContext ctx(mScreen);
 	ctx.ClearRect(ctx.GetViewport(), Color(0, 0, 0, 255));
 
-	// start loading a map
-	new MapView(mUIRoot, "kids3.alm");
+	// start loading data.bin & reg files
+	mTemplateLoader = new TemplateLoader(mUIRoot);
 
 	while (!mExiting)
 	{
 		mUIRoot->PropagateTick();
+
+		// if initial game data is loaded, delete loader and create initial screen
+		if (mTemplateLoader != nullptr && !mTemplateLoader->IsLoading())
+		{
+			delete mTemplateLoader;
+			mTemplateLoader = nullptr;
+			new MapView(mUIRoot, "kids3.alm");
+		}
 		
 		SDL_Event ev;
 		while (mScreen->PollEvent(ev))

@@ -68,6 +68,7 @@ void MapView::LoadingThread()
 
 void MapView::Tick()
 {
+
 	LoadingElement::Tick();
 
 	if (IsLoading())
@@ -83,6 +84,7 @@ void MapView::Tick()
 	// if own map logic, tick it
 	if (mOwnLogic && mLogic != nullptr)
 		mLogic->Tick();
+
 }
 
 bool MapView::HandleEvent(const SDL_Event* ev)
@@ -242,6 +244,50 @@ void MapView::UpdateVisibleRect()
 const Rect& MapView::GetVisibleRect()
 {
 	return mVisibleRect;
+}
+
+const CompoundPalette* MapView::AllocateCompoundPalette(const Color* basePalette)
+{
+	mObjectPalettes.resize(mObjectPalettes.size() + 1);
+	CompoundPalette* pal = &mObjectPalettes[mObjectPalettes.size() - 1];
+	pal->SetBasePalette(basePalette);
+	pal->UpdatePalettes(Color(255, 255, 255, 255), 255, 255);
+	return pal;
+}
+
+void MapView::EnqueueDrawCall(int order, MapViewDrawCall callback)
+{
+
+	DrawCallEntry ent;
+	ent.mWeight = order;
+	ent.mCallback = callback;
+
+	if (mDrawQueue.empty() || (!mDrawQueue.empty() > 0 && mDrawQueue.front().mWeight > order))
+	{
+		mDrawQueue.push_front(ent);
+		return;
+	}
+
+	std::forward_list<DrawCallEntry>::iterator last = mDrawQueue.begin();
+	for (std::forward_list<DrawCallEntry>::iterator it = ++mDrawQueue.begin();
+		it != mDrawQueue.end(); ++it)
+	{
+		if (it->mWeight > order)
+		{
+			mDrawQueue.insert_after(last, ent);
+			break;
+		}
+
+		last++;
+	}
+
+	mDrawQueue.insert_after(last, ent);
+
+}
+
+uint32_t MapView::GetRenderID()
+{
+	return mRenderID;
 }
 
 void MapView::DrawTerrain()
@@ -532,6 +578,7 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 
 void MapView::DrawVisibility()
 {
+
 	// this logic is pretty much from DrawPartial of the image, except it draws shadows instead of alpha
 	// first, take rect in screen space and clip it to viewport
 	const Rect& rec = GetClipRect();
@@ -573,6 +620,10 @@ void MapView::Draw()
 	if (IsLoading())
 		return;
 
+	// begin frame
+	mRenderID++;
+	mDrawQueue.clear();
+
 	// update scrolling if UI wanted it
 	if (mUIScrollX != 0 || mUIScrollY != 0)
 		SetScroll(mScrollX + mUIScrollX, mScrollY + mUIScrollY);
@@ -585,6 +636,24 @@ void MapView::Draw()
 	DrawingContext ctx(Application::GetInstance()->GetScreen(), rec);
 	mTerrain->Blit(ctx, rec.x, rec.y);
 
+	// enqueue objects
+	MapNode* nodes = mLogic->GetNodes() + mVisibleRect.y * mLogic->GetWidth() + mVisibleRect.x;
+	for (int32_t y = mVisibleRect.y; y < mVisibleRect.GetBottom(); y++)
+	{
+		for (int32_t x = mVisibleRect.x; x < mVisibleRect.GetRight(); x++)
+		{
+			for (auto& object : nodes->mObjects)
+				object->CheckDraw(this);
+			nodes++;
+		}
+		nodes += mLogic->GetWidth() - mVisibleRect.w;
+	}
+
+	// draw objects
+	for (auto& ent : mDrawQueue)
+		ent.mCallback(this);
+
+	// draw fog of war
 	DrawVisibility();
 	
 }
@@ -628,5 +697,28 @@ void MapView::FixedTick()
 			nodes += mLogic->GetWidth() - mVisibleRect.w;
 		}
 	}
+
+	// update non-active objects (trees...)
+	std::forward_list<MapObject*> toErase;
+	MapNode* nodes = mLogic->GetNodes() + mVisibleRect.y * mLogic->GetWidth() + mVisibleRect.x;
+	for (int32_t y = mVisibleRect.GetBottom()-1; y >= mVisibleRect.y; y--)
+	{
+		for (int32_t x = mVisibleRect.GetRight()-1; x >= mVisibleRect.x; x--)
+		{
+			for (auto& object : nodes->mObjects)
+			{
+				if (!object->IsAdded())
+				{
+					if (!object->Tick())
+						toErase.push_front(object);
+				}
+			}
+			nodes++;
+		}
+		nodes += mLogic->GetWidth() - mVisibleRect.w;
+	}
+
+	for (auto& obj : toErase)
+		delete obj;
 
 }

@@ -26,6 +26,17 @@ void UIElement::PropagateClip(bool haveParentResize)
 
 void UIElement::PropagateTick()
 {
+	for (std::vector<UIElement*>::iterator it = mChildren.begin();
+		it != mChildren.end(); ++it)
+	{
+		UIElement* child = *it;
+		if (child->mIsClosing)
+		{
+			it--;
+			delete child;
+		}
+	}
+
 	Tick();
 	for (auto& child : mChildren)
 		child->PropagateTick();
@@ -157,11 +168,12 @@ void UIElement::RemoveChild(UIElement* child)
 	for (std::vector<UIElement*>::iterator it = mChildren.begin();
 		it != mChildren.end(); ++it)
 	{
-		if ((*it) == this)
+		if ((*it) == child)
 		{
-			std::vector<UIElement*>::iterator toErase = it;
-			it--;
-			mChildren.erase(toErase);
+			// sadly it-- is not always possible.
+			// so for now just not expect it to be added twice...
+			mChildren.erase(it);
+			return;
 		}
 	}
 }
@@ -240,6 +252,11 @@ bool UIElement::SetFocusable(bool focusable)
 	if (focusable) mFlags = mFlags | UIElementFlags::Focusable;
 	else mFlags = mFlags & ~UIElementFlags::Focusable;
 	return focusable;
+}
+
+void UIElement::Close()
+{
+	mIsClosing = true;
 }
 
 void UIElement::SetClientRect(const Rect& newClientRect)

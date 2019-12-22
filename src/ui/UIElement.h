@@ -68,6 +68,9 @@ public:
 	bool SetFocused(bool focused);
 	bool SetFocusable(bool focusable);
 
+	// a way to delete self
+	void Close();
+
 private:
 
 	UIElement* mParent = nullptr;
@@ -75,6 +78,7 @@ private:
 	Rect mClientRect;
 	Rect mClipRect;
 	UIElementFlags mFlags = UIElementFlags::NoFlags;
+	bool mIsClosing = false;
 
 	void UpdateClipRect();
 

@@ -1,15 +1,15 @@
-#include "Sprite16A.h"
+#include "Sprite256.h"
 #include "../Application.h"
 #include "../utils.h"
 #include "../logging.h"
 
-Sprite16A::Sprite16A(const std::string& path)
+Sprite256::Sprite256(const std::string& path)
 {
 
 	MemoryStream ms;
 	if (!Application::GetInstance()->GetResources()->ReadFile(ms, path))
 		Application::GetInstance()->Abort(Format("Critical: couldn't load \"%s\"", path));
-	
+
 	// count of sprites
 	ms.SetPosition(ms.GetLength() - 4);
 	uint32_t countOfSprites = ms.ReadUInt32();
@@ -40,7 +40,7 @@ Sprite16A::Sprite16A(const std::string& path)
 
 }
 
-void Sprite16A::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, const Color* palette)
+void Sprite256::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, const Color* palette)
 {
 
 	if (index >= mFrames.size())
@@ -48,34 +48,36 @@ void Sprite16A::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 
 	SpriteFrame& frame = mFrames[index];
 	const Color* paletteData = palette;
-	uint16_t* spriteData = (uint16_t*)frame.mData.data();
+	uint8_t* spriteData = (uint8_t*)frame.mData.data();
 
 	Rect frameRec = Rect::FromXYWH(x, y, frame.mWidth, frame.mHeight);
 	Rect viewRec = ctx.GetViewport();
 	if (!viewRec.Intersects(frameRec))
 		return;
 
+	bool isWhole = (viewRec.GetIntersection(frameRec) == frameRec);
+
 	Color* buffer = ctx.GetBuffer() + ctx.GetPitch() * y + x;
 
 	int32_t inX = x;
 	int32_t inY = y;
-	uint16_t* maxSpriteData = (uint16_t*)(frame.mData.data() + frame.mData.size());
+	uint8_t* maxSpriteData = (uint8_t*)(frame.mData.data() + frame.mData.size());
 	while (spriteData < maxSpriteData)
 	{
-		uint16_t rleType = *spriteData++;
+		uint8_t rleType = *spriteData++;
 
-		if (rleType & 0xC000)
+		if (rleType & 0xC0)
 		{
-			if (rleType & 0x4000)
+			if (rleType & 0x40)
 			{
-				buffer += ctx.GetPitch() * (rleType & 0xFF);
-				inY += rleType & 0xFF;
+				buffer += ctx.GetPitch() * (rleType & 0x3F);
+				inY += rleType & 0x3F;
 			}
 			else
 			{
-				buffer += rleType & 0xFF;
-				inX += rleType & 0xFF;
-				if (inX == frame.mWidth+x)
+				buffer += rleType & 0x3F;
+				inX += rleType & 0x3F;
+				if (inX == frame.mWidth + x)
 				{
 					inX = x;
 					inY++;
@@ -85,7 +87,7 @@ void Sprite16A::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 		}
 		else
 		{
-			rleType &= 0xFF;
+			rleType &= 0x3F;
 
 			if (inY < viewRec.GetTop() || inY >= viewRec.GetBottom())
 			{
@@ -100,11 +102,8 @@ void Sprite16A::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 			{
 				if (inX >= viewRec.GetLeft() && inX < viewRec.GetRight())
 				{
-					uint16_t px = *spriteData;
-					px >>= 1;
-					uint8_t alpha = ((px & 0x0F00) >> 8);
-					uint8_t palIndex = px & 0xFF;
-					DrawingContext::AlphaBlend16(Color(paletteData[palIndex], alpha), *buffer);
+					uint8_t palIndex = *spriteData;
+					*buffer = Color(paletteData[palIndex], 255);
 				}
 
 				spriteData++;

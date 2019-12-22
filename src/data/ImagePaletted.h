@@ -22,7 +22,7 @@ public:
 
 	uint8_t GetPixelAt(uint32_t x, uint32_t y);
 	uint8_t* GetBuffer();
-	const std::vector<Color>& GetPalette();
+	const Color* GetPalette();
 
 	void SetSize(uint32_t w, uint32_t h);
 	void MoveInPlace(int32_t offsX, int32_t offsY);

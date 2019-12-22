@@ -11,7 +11,7 @@ class CompoundPalette
 {
 public:
 
-	void SetBasePalette(const std::vector<Color>& basePalette);
+	void SetBasePalette(const Color* basePalette);
 	// brightness, contrast are from 0 to 255 (or larger) where 255 is normal
 	void UpdatePalettes(Color tint, uint16_t brightness, uint16_t contrast);
 	const Color* GetPalette(uint32_t index) const;

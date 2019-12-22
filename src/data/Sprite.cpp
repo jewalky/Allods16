@@ -19,7 +19,9 @@ uint32_t Sprite::GetSize()
 	return mFrames.size();
 }
 
-const std::vector<Color>& Sprite::GetPalette()
+const Color* Sprite::GetPalette()
 {
-	return mPalette;
+	if (mPalette.size() == 0)
+		return nullptr;
+	return mPalette.data();
 }

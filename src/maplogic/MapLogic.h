@@ -2,9 +2,12 @@
 
 #include <string>
 #include <vector>
+#include <forward_list>
+#include "MapObject.h"
 
 struct MapNode
 {
+
 	// no not class enum thanks
 	enum MapNodeFlags
 	{
@@ -23,6 +26,9 @@ struct MapNode
 	uint16_t mTile;
 	int8_t mHeight;
 	uint16_t mFlags;
+
+	std::forward_list<MapObject*> mObjects;
+
 };
 
 class MapView;
@@ -47,6 +53,11 @@ public:
 	void AttachView(MapView* view);
 	void DetachView(MapView* view);
 
+	void AddObject(MapObject* obj);
+	void RemoveObject(MapObject* obj);
+
+	int8_t GetHeightAt(float_t x, float_t y);
+
 private:
 
 	//
@@ -61,6 +72,12 @@ private:
 	uint32_t mWidth;
 	uint32_t mHeight;
 	std::vector<MapNode> mNodes;
+	// objects processed during Tick()
+	std::forward_list<MapObject*> mObjects;
+	// objects used for garbage collection
+	std::forward_list<MapObject*> mAllObjects;
+
+	friend class MapObject;
 
 	// playsim data
 	uint8_t mSpeed;
