@@ -275,7 +275,7 @@ void MapView::EnqueueDrawCall(int order, MapViewDrawCall callback)
 		if (it->mWeight > order)
 		{
 			mDrawQueue.insert_after(last, ent);
-			break;
+			return;
 		}
 
 		last++;

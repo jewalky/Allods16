@@ -114,3 +114,88 @@ void Sprite256::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 	}
 
 }
+
+void Sprite256::DrawShadow(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, int32_t offset, uint8_t power)
+{
+
+	if (index >= mFrames.size())
+		return;
+
+	SpriteFrame& frame = mFrames[index];
+	uint8_t* spriteData = (uint8_t*)frame.mData.data();
+
+	Rect frameRec = Rect::FromXYWH(x, y, frame.mWidth, frame.mHeight);
+	Rect viewRec = ctx.GetViewport();
+	if (!viewRec.Intersects(frameRec))
+		return;
+
+	bool isWhole = (viewRec.GetIntersection(frameRec) == frameRec);
+
+	float offs = offset;
+	float yDelta = offs / frame.mHeight;
+
+	Color* buffer = ctx.GetBuffer() + ctx.GetPitch() * y + x + int32_t(offs);
+
+	int32_t inX = x + int32_t(offs);
+	int32_t inY = y;
+	uint8_t* maxSpriteData = (uint8_t*)(frame.mData.data() + frame.mData.size());
+	int32_t nextOffs = inX + frame.mWidth;
+	while (spriteData < maxSpriteData)
+	{
+		uint8_t rleType = *spriteData++;
+
+		if (rleType & 0xC0)
+		{
+			if (rleType & 0x40)
+			{
+				inY += rleType & 0x3F;
+				offs -= yDelta * (rleType & 0x3F);
+				inX = x + offs;
+				buffer = ctx.GetBuffer() + ctx.GetPitch() * inY + inX;
+				nextOffs = inX + frame.mWidth;
+			}
+			else
+			{
+				buffer += rleType & 0x3F;
+				inX += rleType & 0x3F;
+				if (inX == nextOffs)
+				{
+					inY++;
+					offs -= yDelta;
+					inX = x + offs;
+					buffer = ctx.GetBuffer() + ctx.GetPitch() * inY + inX;
+					nextOffs = inX + frame.mWidth;
+				}
+			}
+		}
+		else
+		{
+			rleType &= 0x3F;
+
+			if (inY < viewRec.GetTop() || inY >= viewRec.GetBottom())
+			{
+				spriteData += rleType;
+				buffer += rleType;
+				inX += rleType;
+				continue;
+			}
+
+			// some pixels
+			for (uint8_t i = 0; i < rleType; i++)
+			{
+				if (inX >= viewRec.GetLeft() && inX < viewRec.GetRight())
+				{
+					uint8_t palIndex = *spriteData;
+					buffer->components.r /= power;
+					buffer->components.g /= power;
+					buffer->components.b /= power;
+				}
+
+				spriteData++;
+				buffer++;
+				inX++;
+			}
+		}
+	}
+
+}

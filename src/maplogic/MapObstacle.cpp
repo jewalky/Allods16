@@ -66,26 +66,39 @@ void MapObstacle::Draw(MapView* view)
 	int x = (pos.x - view->GetScrollX()) * 32 + 16;
 	int y = (pos.y - view->GetScrollY()) * 32 + 16 - GetLogic()->GetHeightAt(pos.x + 0.5, pos.y + 0.5);
 
-	view->EnqueueDrawCall(y, [this, x, y](MapView* view){
-		
-		mClass->mFile.CheckLoad(view);
-		
-		Sprite256* sprite = mClass->mFile.mSprite;
-		if (sprite == nullptr)
-			return;
+	mClass->mFile.CheckLoad(view);
 
-		const CompoundPalette* pal = mClass->mFile.GetPalette(view);
-		uint32_t realFrame = mClass->mFrames[mFrame].mFrame;
-		
-		int fw = sprite->GetWidth(realFrame);
-		int fh = sprite->GetHeight(realFrame);
-		
-		int drawX = x - mClass->mCenterX * fw;
-		int drawY = y - mClass->mCenterY * fh;
+	Sprite256* sprite = mClass->mFile.mSprite;
+	if (sprite == nullptr)
+		return;
 
+	const CompoundPalette* pal = mClass->mFile.GetPalette(view);
+	uint32_t realFrame = mClass->mFrames[mFrame].mFrame;
+
+	int fw = sprite->GetWidth(realFrame);
+	int fh = sprite->GetHeight(realFrame);
+
+	int drawX = x - mClass->mCenterX * fw;
+	int drawY = y - mClass->mCenterY * fh;
+	float shadowOffs = 0.3;
+	int shadowOffsReal = shadowOffs * fh;
+	int shadowDrawX = x - mClass->mCenterX * fw + (-shadowOffsReal) * (1 - mClass->mCenterY);
+
+	// draw sprite
+	view->EnqueueDrawCall(y, [sprite, drawX, drawY, realFrame](MapView* view){
+		
 		DrawingContext ctx(Application::GetInstance()->GetScreen(), view->GetClipRect());
 		sprite->Draw(ctx, drawX, drawY, realFrame, sprite->GetPalette());
 
 	});
+
+	// draw shadow
+	view->EnqueueDrawCall(y-32, [sprite, shadowDrawX, drawY, realFrame](MapView* view) {
+
+		DrawingContext ctx(Application::GetInstance()->GetScreen(), view->GetClipRect());
+		sprite->DrawShadow(ctx, shadowDrawX, drawY, realFrame, 32, 2);
+
+	});
+	
 
 }
