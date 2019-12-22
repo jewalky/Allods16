@@ -27,6 +27,7 @@ MapView::MapView(UIElement* parent, const std::string& path) : LoadingElement(pa
 
 MapView::~MapView()
 {
+
 	for (auto& image : mTiles)
 		delete image;
 
@@ -36,6 +37,9 @@ MapView::~MapView()
 		if (mOwnLogic)
 			delete mLogic;
 	}
+
+	for (auto& pal : mObjectPalettes)
+		delete pal;
 
 }
 
@@ -159,7 +163,7 @@ bool MapView::HandleEvent(const SDL_Event* ev)
 					{
 
 						uint16_t flags = nodes->mFlags;
-						if (abs(x - cx) < 4 && abs(y - cy) < 4)
+						if (abs(x - cx) < 8 && abs(y - cy) < 8)
 						{
 							flags |= MapNode::Discovered | MapNode::Visible;
 						}
@@ -174,14 +178,20 @@ bool MapView::HandleEvent(const SDL_Event* ev)
 								flags |= MapNode::NeedRedraw;
 							nodes->mFlags = flags | MapNode::NeedRedrawFOW;
 							int pitch = mLogic->GetWidth();
-							(nodes - pitch - 1)->mFlags |= MapNode::NeedRedrawFOW;
-							(nodes - pitch)->mFlags |= MapNode::NeedRedrawFOW;
-							(nodes - pitch + 1)->mFlags |= MapNode::NeedRedrawFOW;
+							if (y > 0)
+							{
+								if (x > 0) (nodes - pitch - 1)->mFlags |= MapNode::NeedRedrawFOW;
+								(nodes - pitch)->mFlags |= MapNode::NeedRedrawFOW;
+								if (x+1 < pitch) (nodes - pitch + 1)->mFlags |= MapNode::NeedRedrawFOW;
+							}
 							(nodes - 1)->mFlags |= MapNode::NeedRedrawFOW;
 							(nodes + 1)->mFlags |= MapNode::NeedRedrawFOW;
-							(nodes + pitch - 1)->mFlags |= MapNode::NeedRedrawFOW;
-							(nodes + pitch)->mFlags |= MapNode::NeedRedrawFOW;
-							(nodes + pitch + 1)->mFlags |= MapNode::NeedRedrawFOW;
+							if (y + 1 < mLogic->GetHeight())
+							{
+								if (x > 0) (nodes + pitch - 1)->mFlags |= MapNode::NeedRedrawFOW;
+								(nodes + pitch)->mFlags |= MapNode::NeedRedrawFOW;
+								if (x+1 < pitch) (nodes + pitch + 1)->mFlags |= MapNode::NeedRedrawFOW;
+							}
 						}
 
 						nodes++;
@@ -248,10 +258,10 @@ const Rect& MapView::GetVisibleRect()
 
 const CompoundPalette* MapView::AllocateCompoundPalette(const Color* basePalette)
 {
-	mObjectPalettes.resize(mObjectPalettes.size() + 1);
-	CompoundPalette* pal = &mObjectPalettes[mObjectPalettes.size() - 1];
+	CompoundPalette* pal = new CompoundPalette();
 	pal->SetBasePalette(basePalette);
 	pal->UpdatePalettes(Color(255, 255, 255, 255), 255, 255);
+	mObjectPalettes.push_back(pal);
 	return pal;
 }
 

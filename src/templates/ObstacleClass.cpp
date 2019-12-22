@@ -229,8 +229,7 @@ void ObstacleFile::CheckLoad(MapView* view)
 
 	if (view != nullptr)
 	{
-		const CompoundPalette* pal = mPalettes[view];
-		if (pal == nullptr)
+		if (mPalettes.find(view) == mPalettes.end())
 			mPalettes[view] = view->AllocateCompoundPalette(mSprite->GetPalette());
 	}
 

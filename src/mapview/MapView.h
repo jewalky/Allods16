@@ -89,7 +89,7 @@ private:
 	uint64_t mWaterAnimTime;
 
 	// object palettes
-	std::vector<CompoundPalette> mObjectPalettes;
+	std::vector<CompoundPalette*> mObjectPalettes;
 
 	// drawing queue
 	uint32_t mRenderID = 0;

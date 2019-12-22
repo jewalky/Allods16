@@ -84,11 +84,14 @@ void MapObstacle::Draw(MapView* view)
 	int shadowOffsReal = shadowOffs * fh;
 	int shadowDrawX = x - mClass->mCenterX * fw + (-shadowOffsReal) * (1 - mClass->mCenterY);
 
+	const Color* palette = mClass->mFile.GetPalette(view)->GetPalette(16);
+	uint8_t r = palette[0].components.r;
+
 	// draw sprite
-	view->EnqueueDrawCall(y, [sprite, drawX, drawY, realFrame](MapView* view){
+	view->EnqueueDrawCall(y, [sprite, drawX, drawY, realFrame, palette](MapView* view){
 		
 		DrawingContext ctx(Application::GetInstance()->GetScreen(), view->GetClipRect());
-		sprite->Draw(ctx, drawX, drawY, realFrame, sprite->GetPalette());
+		sprite->Draw(ctx, drawX, drawY, realFrame, palette);
 
 	});
 
