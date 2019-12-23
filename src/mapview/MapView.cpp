@@ -331,6 +331,7 @@ void MapView::DrawTerrain()
 				int deltaX = (mLastScrollX - mScrollX) * 32;
 				int deltaY = (mLastScrollY - mScrollY) * 32;
 				mTerrain->MoveInPlace(deltaX, deltaY);
+				mTerrainFOW->MoveInPlace(deltaX, deltaY);
 			}
 			mLastScrollX = mScrollX;
 			mLastScrollY = mScrollY;
@@ -394,9 +395,6 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 	// for convenience
 	int x3 = x1, x4 = x2;
 
-	if (x2 <= 0 || x1 >= mTerrain->GetWidth())
-		return false;
-
 	int y1 = (y - mScrollY) * 32;
 	int y2 = (y - mScrollY) * 32;
 	int y3 = (y - mScrollY) * 32 + 32;
@@ -413,6 +411,9 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 		return false;
 
 	bool wouldFitInY = (minDrawY >= 0 && maxDrawY < mTerrain->GetHeight());
+
+	if (x2 <= 0 || x1 >= mTerrain->GetWidth())
+		return wouldFitInY;
 
 	// lerp brightness
 	uint8_t brightness1 = 16;
