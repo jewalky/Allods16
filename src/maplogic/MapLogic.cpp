@@ -24,6 +24,9 @@ MapLogic::MapLogic(const std::string& path)
 		return;
 	}
 
+	mName = alm.mInfo.mName;
+	mAuthor = alm.mInfo.mName;
+	mSolarAngle = alm.mInfo.mSolarAngle;
 	mWidth = alm.mInfo.mWidth;
 	mHeight = alm.mInfo.mHeight;
 	mNodes.resize(mWidth * mHeight);

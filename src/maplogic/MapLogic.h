@@ -43,6 +43,9 @@ public:
 	void Tick();
 	void FixedTick();
 
+	std::string GetMapName() { return mName; }
+	std::string GetMapAuthor() { return mAuthor; }
+	float_t GetSolarAngle() { return mSolarAngle; }
 	uint32_t GetWidth();
 	uint32_t GetHeight();
 	MapNode* GetNodes();
@@ -69,8 +72,13 @@ private:
 	std::vector<MapView*> mViews;
 	
 	// map data
+	std::string mName;
+	std::string mAuthor;
 	uint32_t mWidth;
 	uint32_t mHeight;
+	//
+	float_t mSolarAngle;
+	//
 	std::vector<MapNode> mNodes;
 	// objects processed during Tick()
 	std::forward_list<MapObject*> mObjects;

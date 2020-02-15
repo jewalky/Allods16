@@ -49,6 +49,8 @@ private:
 
 	virtual void LoadingThread();
 	void UpdateVisibleRect();
+	void UpdateShade();
+	void UpdateLight();
 	
 	// terrain drawing
 	void DrawTerrain();
@@ -90,6 +92,11 @@ private:
 
 	// object palettes
 	std::vector<CompoundPalette*> mObjectPalettes;
+
+	// dynamic lighting and terrain shading
+	std::vector<uint8_t> mTerrainShade; // absolute 0 - 255
+	std::vector<int8_t> mTerrainLight; // relative -128 - 127
+
 
 	// drawing queue
 	uint32_t mRenderID = 0;

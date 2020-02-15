@@ -17,10 +17,10 @@ void CompoundPalette::UpdatePalettes(Color tint, uint16_t brightness, uint16_t c
 	if (tint == mLastTint && brightness == mLastBrightness && contrast == mLastContrast)
 		return;
 
-	mGeneratedPalettes.resize(mBasePalette.size() * 33);
+	mGeneratedPalettes.resize(mBasePalette.size() * 65);
 
 	// generate dark palettes
-	for (int i = 0; i < 33; i++)
+	for (int i = 0; i < 65; i++)
 	{
 		Color* generatedData = mGeneratedPalettes.data() + mBasePalette.size() * i;
 
@@ -48,19 +48,19 @@ void CompoundPalette::UpdatePalettes(Color tint, uint16_t brightness, uint16_t c
 			b = b * brightness / 255;
 
 			// #4: apply brightness delta
-			if (i < 15)
+			if (i < 31)
 			{
 				// dark
-				r = r * i / 15;
-				g = g * i / 15;
-				b = b * i / 15;
+				r = r * i / 31;
+				g = g * i / 31;
+				b = b * i / 31;
 			}
-			else if (i > 16)
+			else if (i > 32)
 			{
-				int brightPower = (i - 15) * 2;
-				r += r * brightPower / 15;
-				g += g * brightPower / 15;
-				b += b * brightPower / 15;
+				int brightPower = (i - 31) * 2;
+				r += r * brightPower / 31;
+				g += g * brightPower / 31;
+				b += b * brightPower / 31;
 			}
 
 			// #5: clamp to 0-255

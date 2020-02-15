@@ -1,6 +1,7 @@
 #include "MapView.h"
 #include "../Application.h"
 #include <algorithm>
+#include <cmath>
 
 MapView::MapView(UIElement* parent, MapLogic* logic) : LoadingElement(parent)
 {
@@ -216,6 +217,9 @@ void MapView::SetDefaults()
 	mTerrain = new ImageTruecolor(clientRect.w, clientRect.h);
 	mTerrainFOW = new ImagePaletted(mTerrain->GetWidth(), mTerrain->GetHeight());
 	SetScroll(8, 8);
+	mTerrainShade.resize(mLogic->GetWidth() * mLogic->GetHeight());
+	mTerrainLight.resize(mLogic->GetWidth() * mLogic->GetHeight());
+	UpdateShade();
 }
 
 void MapView::SetScroll(int32_t x, int32_t y)
@@ -390,6 +394,12 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 	MapNode& node3 = *(nodes + nodesPitch);
 	MapNode& node4 = *(nodes + nodesPitch + 1);
 
+	uint8_t* shade = mTerrainShade.data() + nodesPitch * y + x;
+	uint8_t shade1 = *shade;
+	uint8_t shade2 = *(shade + 1);
+	uint8_t shade3 = *(shade + nodesPitch);
+	uint8_t shade4 = *(shade + nodesPitch + 1);
+
 	int x1 = (x - mScrollX) * 32;
 	int x2 = (x - mScrollX) * 32 + 32;
 	// for convenience
@@ -416,10 +426,10 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 		return wouldFitInY;
 
 	// lerp brightness
-	uint8_t brightness1 = 16;
-	uint8_t brightness2 = 16;
-	uint8_t brightness3 = 16;
-	uint8_t brightness4 = 16;
+	uint8_t brightness1 = shade1 / 4;
+	uint8_t brightness2 = shade2 / 4;
+	uint8_t brightness3 = shade3 / 4;
+	uint8_t brightness4 = shade4 / 4;
 
 	// fog of war
 	static uint8_t fow[32 * 32];
@@ -543,8 +553,8 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 		float brightnessX1, brightnessX2;
 		if (node1.mFlags & MapNode::NeedRedraw)
 		{
-			brightnessX1 = brightness1 * fX + brightness2 * (1 - fX);
-			brightnessX2 = brightness3 * fX + brightness4 * (1 - fX);
+			brightnessX1 = brightness2 * fX + brightness1 * (1 - fX);
+			brightnessX2 = brightness4 * fX + brightness3 * (1 - fX);
 		}
 
 		uint8_t* tilePost = tileBuffer + lx;
@@ -562,7 +572,7 @@ bool MapView::DrawTerrainNode(int32_t x, int32_t y, MapNode& node1)
 				int brightnessY;
 				if (node1.mFlags & MapNode::NeedRedraw)
 				{
-					brightnessY = float(brightnessX1 * fY + brightnessX2 * (1 - fY));
+					brightnessY = float(brightnessX2 * fY + brightnessX1 * (1 - fY));
 					uint8_t palColor = *(tilePost + inY * tileImage->GetWidth());
 					*post = paletteBuffer.GetPalette(brightnessY)[palColor];
 				}
@@ -731,5 +741,75 @@ void MapView::FixedTick()
 
 	for (auto& obj : toErase)
 		delete obj;
+
+}
+
+void MapView::UpdateShade()
+{
+	float sunang = mLogic->GetSolarAngle() * (M_PI / 180);
+	
+	float sunx = cos(sunang);
+	float suny = sin(sunang);
+	float sunz = -0.75;
+
+	uint8_t* result = mTerrainShade.data();
+	MapNode* nodes = mLogic->GetNodes();
+	for (int32_t y = 0; y < mLogic->GetHeight(); y++)
+	{
+		for (int32_t x = 0; x < mLogic->GetWidth(); x++)
+		{
+			
+			if ((x <= 1) || (y <= 1) ||
+				(x >= mLogic->GetWidth() - 2) || (y >= mLogic->GetHeight() - 2))
+			{
+				nodes++;
+				*result++ = 0;
+				continue;
+			}
+
+			// 
+			float p1x = x * 32.0;
+			float p1y = y * 32.0;
+			float p1z = nodes->mHeight;
+
+			float p2x = x * 32.0 + 32.0;
+			float p2y = y * 32.0;
+			float p2z = (nodes + 1)->mHeight;
+
+			float p3x = x * 32.0;
+			float p3y = y * 32.0 + 32.0;
+			float p3z = (nodes + mLogic->GetWidth())->mHeight;
+
+			//
+			float ux = p2x - p1x;
+			float uy = p2y - p1y;
+			float uz = p2z - p1z;
+
+			float vx = p3x - p1x;
+			float vy = p3y - p1y;
+			float vz = p3z - p1z;
+
+			//
+			float nx = (uy * vz) - (uz * vy);
+			float ny = (uz * vx) - (ux * vz);
+			float nz = (ux * vy) - (uy * vx);
+
+			//
+			float nl = sqrt((nx * nx) + (ny * ny) + (nz * nz));
+			nx /= nl;
+			ny /= nl;
+			nz /= nl;
+
+			float dot = fabs(nx * sunx + ny * suny + nz * sunz) * 64.0 + 96.0;
+
+			nodes++;
+			*result++ = (uint8_t)dot;
+
+		}
+	}
+}
+
+void MapView::UpdateLight()
+{
 
 }
