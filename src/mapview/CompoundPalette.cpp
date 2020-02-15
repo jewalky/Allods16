@@ -57,7 +57,7 @@ void CompoundPalette::UpdatePalettes(Color tint, uint16_t brightness, uint16_t c
 			}
 			else if (i > 32)
 			{
-				int brightPower = (i - 31) * 2;
+				int brightPower = (i - 32) * 2;
 				r += r * brightPower / 31;
 				g += g * brightPower / 31;
 				b += b * brightPower / 31;

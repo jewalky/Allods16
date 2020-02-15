@@ -752,6 +752,11 @@ void MapView::UpdateShade()
 	float suny = sin(sunang);
 	float sunz = -0.75;
 
+	float sunl = sqrt(sunx * sunx + suny * suny + sunz * sunz);
+	sunx /= sunl;
+	suny /= sunl;
+	sunz /= sunl;
+
 	uint8_t* result = mTerrainShade.data();
 	MapNode* nodes = mLogic->GetNodes();
 	for (int32_t y = 0; y < mLogic->GetHeight(); y++)
@@ -801,6 +806,7 @@ void MapView::UpdateShade()
 			nz /= nl;
 
 			float dot = fabs(nx * sunx + ny * suny + nz * sunz) * 64.0 + 96.0;
+			dot = (dot - 128) * 0.75 + 128; // lower contrast
 
 			nodes++;
 			*result++ = (uint8_t)dot;
