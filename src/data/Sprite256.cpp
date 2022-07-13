@@ -77,7 +77,7 @@ void Sprite256::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 			{
 				buffer += rleType & 0x3F;
 				inX += rleType & 0x3F;
-				if (inX >= frame.mWidth + x)
+				if (inX >= static_cast<int32_t>(frame.mWidth) + x)
 				{
 					inX = x + (inX - (frame.mWidth + x));
 					inY++;
@@ -143,7 +143,7 @@ void Sprite256::DrawShadow(DrawingContext& ctx, int32_t x, int32_t y, uint32_t i
 	int32_t inX = x + int32_t(offs);
 	int32_t inY = y;
 	uint8_t* maxSpriteData = (uint8_t*)(frame.mData.data() + frame.mData.size());
-	int32_t nextOffs = inX + frame.mWidth;
+	int32_t nextOffs = inX + static_cast<int32_t>(frame.mWidth);
 	while (spriteData < maxSpriteData)
 	{
 		uint8_t rleType = *spriteData++;
