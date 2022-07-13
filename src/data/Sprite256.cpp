@@ -77,9 +77,9 @@ void Sprite256::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 			{
 				buffer += rleType & 0x3F;
 				inX += rleType & 0x3F;
-				if (inX == frame.mWidth + x)
+				if (inX >= frame.mWidth + x)
 				{
-					inX = x;
+					inX = x + (inX - (frame.mWidth + x));
 					inY++;
 					buffer += ctx.GetPitch() - frame.mWidth;
 				}
@@ -162,13 +162,15 @@ void Sprite256::DrawShadow(DrawingContext& ctx, int32_t x, int32_t y, uint32_t i
 			{
 				buffer += rleType & 0x3F;
 				inX += rleType & 0x3F;
-				if (inX == nextOffs)
+				if (inX >= nextOffs)
 				{
 					inY++;
 					offs -= yDelta;
+					int fallthroughRLEOffset = (inX - nextOffs);
 					inX = x + offs;
-					buffer = ctx.GetBuffer() + ctx.GetPitch() * inY + inX;
 					nextOffs = inX + frame.mWidth;
+					inX += fallthroughRLEOffset;
+					buffer = ctx.GetBuffer() + ctx.GetPitch() * inY + inX;
 				}
 			}
 		}

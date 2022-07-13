@@ -176,10 +176,12 @@
     <ClCompile Include="src\Stream.cpp" />
     <ClCompile Include="src\templates\ObstacleClass.cpp" />
     <ClCompile Include="src\templates\TemplateLoader.cpp" />
+    <ClCompile Include="src\templates\Templates.cpp" />
     <ClCompile Include="src\Thread.cpp" />
     <ClCompile Include="src\ui\LoadingElement.cpp" />
     <ClCompile Include="src\ui\Mouse.cpp" />
     <ClCompile Include="src\ui\RootUIElement.cpp" />
+    <ClCompile Include="src\ui\smacker\SmackerView.cpp" />
     <ClCompile Include="src\ui\UIElement.cpp" />
     <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
@@ -216,10 +218,12 @@
     <ClInclude Include="src\Stream.h" />
     <ClInclude Include="src\templates\ObstacleClass.h" />
     <ClInclude Include="src\templates\TemplateLoader.h" />
+    <ClInclude Include="src\templates\Templates.h" />
     <ClInclude Include="src\Thread.h" />
     <ClInclude Include="src\ui\LoadingElement.h" />
     <ClInclude Include="src\ui\Mouse.h" />
     <ClInclude Include="src\ui\RootUIElement.h" />
+    <ClInclude Include="src\ui\smacker\SmackerView.h" />
     <ClInclude Include="src\ui\UIElement.h" />
     <ClInclude Include="src\utils.h">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
