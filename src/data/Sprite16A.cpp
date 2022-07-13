@@ -75,9 +75,9 @@ void Sprite16A::Draw(DrawingContext& ctx, int32_t x, int32_t y, uint32_t index, 
 			{
 				buffer += rleType & 0xFF;
 				inX += rleType & 0xFF;
-				if (inX == frame.mWidth+x)
+				if (inX >= frame.mWidth+x)
 				{
-					inX = x;
+					inX = x + (inX - (frame.mWidth+x));
 					inY++;
 					buffer += ctx.GetPitch() - frame.mWidth;
 				}
